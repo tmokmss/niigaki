@@ -45,6 +45,7 @@ export type ChipPiece = {
   beats?: 3 | 4;
   groove: "four" | "half" | "break" | "three";
   bassline: "octave" | "fifth" | "pulse";
+  visual?: "danmaku";
   bars: ChipBar[];
 };
 

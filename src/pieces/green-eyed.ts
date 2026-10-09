@@ -117,5 +117,6 @@ export const greenEyed: ChipPiece = {
   beats: 3,
   groove: "three",
   bassline: "octave",
+  visual: "danmaku",
   bars,
 };
