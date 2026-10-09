@@ -22,7 +22,7 @@ export type PianoPiece = {
   finalBell?: string;
 };
 
-// c: root, third, fifth around octave 3-4; m: [note, sixteenths]
+// c: root, third, fifth around octave 3-4; m: [note, sixteenths], "-" for a rest
 export type ChipBar = {
   c: string[];
   m?: [string, number][];
@@ -42,6 +42,8 @@ export type ChipPiece = {
   title: string;
   description: string;
   bpm: number;
+  groove: "four" | "half" | "break";
+  bassline: "octave" | "fifth" | "pulse";
   bars: ChipBar[];
 };
 

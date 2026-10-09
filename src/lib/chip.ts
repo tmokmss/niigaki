@@ -2,10 +2,24 @@ import * as Tone from "tone";
 import type { ChipPiece } from "../pieces/types";
 import { collector, transpose, type Kit, type NoteEvent } from "./score";
 
+// sixteenth-note steps within a bar
+const GROOVES = {
+  four: { kick: [0, 4, 8, 12], snare: [4, 12] },
+  half: { kick: [0, 6, 10], snare: [8] },
+  break: { kick: [0, 10], snare: [4, 12] },
+};
+
+// semitones from the chord root, one per eighth note
+const BASSLINES = {
+  octave: [-24, -12],
+  fifth: [-24, -12, -17, -12],
+};
+
 export function renderChip(piece: ChipPiece) {
   const beat = 60 / piece.bpm;
   const six = beat / 4;
   const { events, add } = collector();
+  const groove = GROOVES[piece.groove];
 
   let t = 0;
   for (const bar of piece.bars) {
@@ -16,13 +30,18 @@ export function renderChip(piece: ChipPiece) {
       for (let i = 0; i < 16; i++) add(t + i * six, "arp", arp[i % 4], six * 0.9, 0.6);
     }
     if (bar.bass) {
-      for (let i = 0; i < 8; i++) add(t + i * 2 * six, "bass", transpose(root, i % 2 ? -12 : -24), six * 1.6, 0.9);
+      if (piece.bassline === "pulse") {
+        for (let i = 0; i < 16; i++) add(t + i * six, "bass", transpose(root, -12), six * 0.7, i % 4 === 0 ? 1 : 0.7);
+      } else {
+        const line = BASSLINES[piece.bassline];
+        for (let i = 0; i < 8; i++) add(t + i * 2 * six, "bass", transpose(root, line[i % line.length]), six * 1.6, 0.9);
+      }
     }
     if (bar.kick) {
-      for (let b = 0; b < 4; b++) add(t + b * beat, "kick", "C1", 0.3, 1);
+      for (const s of groove.kick) add(t + s * six, "kick", "C1", 0.3, 1);
     }
     if (bar.snare) {
-      for (const b of bar.roll ? [1] : [1, 3]) add(t + b * beat, "snare", [], 0.15, 0.8);
+      for (const s of groove.snare.filter((s) => !bar.roll || s < 8)) add(t + s * six, "snare", [], 0.15, 0.8);
     }
     if (bar.roll) {
       for (let i = 8; i < 16; i++) add(t + i * six, "snare", [], 0.1, 0.3 + (i - 8) * 0.08);
@@ -38,8 +57,10 @@ export function renderChip(piece: ChipPiece) {
     let mt = t;
     for (const [note, steps] of bar.m ?? []) {
       const dur = steps * six;
-      add(mt, "lead", note, dur * 0.92, 0.8);
-      if (bar.harm) add(mt, "harm", transpose(note, -12), dur * 0.92, 0.7);
+      if (note !== "-") {
+        add(mt, "lead", note, dur * 0.92, 0.8);
+        if (bar.harm) add(mt, "harm", transpose(note, -12), dur * 0.92, 0.7);
+      }
       mt += dur;
     }
     t += beat * 4;
