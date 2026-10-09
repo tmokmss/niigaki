@@ -1,12 +1,12 @@
 import * as Tone from "tone";
 import type { Piece } from "../pieces/types";
 import { chipKit, renderChip } from "./chip";
-import { hexagon } from "./hexagon";
 import { pianoKit, renderPiano, sparks } from "./piano";
+import { pixels } from "./pixels";
 
 export function mount(piece: Piece, els: { canvas: HTMLCanvasElement; button: HTMLButtonElement; status: HTMLElement }) {
   const kit = piece.kind === "chip" ? chipKit(piece.bpm) : pianoKit(piece.bpm);
-  const visual = piece.kind === "chip" ? hexagon(els.canvas) : sparks(els.canvas);
+  const visual = piece.kind === "chip" ? pixels(els.canvas) : sparks(els.canvas);
   const transport = Tone.getTransport();
   const draw = Tone.getDraw();
   const label = els.status.textContent;
