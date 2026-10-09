@@ -45,7 +45,7 @@ export function renderPiano(piece: PianoPiece) {
   if (piece.finalBell) add(t + 0.8, "bell", piece.finalBell, 1.2, 0.4);
   add(t, "pad", ["C5", "Eb5", "Bb5"], beat * 6, 1);
 
-  return { events, loopStart: 0, end: t + beat * 10 };
+  return { events, end: t + beat * 10 };
 }
 
 const SAMPLES = ["A0", "C1", "D#1", "F#1", "A1", "C2", "D#2", "F#2", "A2", "C3", "D#3", "F#3", "A3",

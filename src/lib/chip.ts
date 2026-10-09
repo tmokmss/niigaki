@@ -7,10 +7,8 @@ export function renderChip(piece: ChipPiece) {
   const six = beat / 4;
   const { events, add } = collector();
 
-  let t = 0.2;
-  let loopStart = 0;
-  for (const [index, bar] of piece.bars.entries()) {
-    if (index === piece.loopFrom) loopStart = t;
+  let t = 0;
+  for (const bar of piece.bars) {
     const [root, third, fifth] = bar.c;
 
     if (bar.arp) {
@@ -47,7 +45,7 @@ export function renderChip(piece: ChipPiece) {
     t += beat * 4;
   }
 
-  return { events, loopStart, end: t };
+  return { events, end: t };
 }
 
 export function chipKit(bpm: number): Kit {

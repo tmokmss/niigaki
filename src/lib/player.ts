@@ -30,14 +30,14 @@ export function mount(piece: Piece, els: { canvas: HTMLCanvasElement; button: HT
 
     transport.cancel();
     transport.position = 0;
-    const { events, loopStart, end } = piece.kind === "chip" ? renderChip(piece) : renderPiano(piece);
+    const { events, end } = piece.kind === "chip" ? renderChip(piece) : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
         draw.schedule(() => visual(e), time);
       }, e.t);
     }
-    transport.setLoopPoints(loopStart, end);
+    transport.setLoopPoints(0, end);
     transport.loop = true;
     transport.start("+0.1");
     playing = true;

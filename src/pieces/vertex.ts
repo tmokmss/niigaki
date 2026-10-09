@@ -34,9 +34,17 @@ const MELODY_B: [string, number][][] = [
 
 const full = { arp: true, bass: true, kick: true, snare: true };
 
+// the last drop ends on a held B over G; the first bar resolves it to A, so the end runs straight into the start
 const bars: ChipBar[] = [
-  ...A_PROG.slice(0, 4).map((c) => ({ c, arp: true, hat: 8 as const })),
-  ...A_PROG.slice(0, 4).map((c, i) => ({ c, arp: true, bass: true, kick: true, hat: 8 as const, roll: i === 3 })),
+  ...A_PROG.slice(0, 4).map((c, i) => ({
+    c,
+    m: i === 0 ? ([["A5", 8]] as [string, number][]) : undefined,
+    arp: true,
+    bass: true,
+    kick: true,
+    hat: 8 as const,
+    roll: i === 3,
+  })),
   ...MELODY_A.map((m, i) => ({ c: A_PROG[i], m, ...full, hat: 16 as const, crash: i === 0 })),
   ...MELODY_B.map((m, i) => ({ c: B_PROG[i], m, ...full, hat: 8 as const, crash: i === 0, roll: i === 7 })),
   ...A_PROG.slice(0, 4).map((c, i) => ({ c, arp: true, bass: true, crash: i === 0, roll: i === 3 })),
@@ -50,5 +58,4 @@ export const vertex: ChipPiece = {
   description: "pulse / triangle / noise",
   bpm: 150,
   bars,
-  loopFrom: 8,
 };

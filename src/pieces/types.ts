@@ -43,8 +43,6 @@ export type ChipPiece = {
   description: string;
   bpm: number;
   bars: ChipBar[];
-  // index of the bar the loop returns to after the last bar
-  loopFrom: number;
 };
 
 export type Piece = PianoPiece | ChipPiece;
