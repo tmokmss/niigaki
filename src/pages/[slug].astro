@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import { pieces } from "../pieces";
+
+export function getStaticPaths() {
+  return pieces.map((p) => ({ params: { slug: p.slug }, props: { piece: p } }));
+}
+
+const { piece } = Astro.props;
+---
+<Base title={`${piece.title} — niigaki`}>
+  <canvas id="c"></canvas>
+  <a class="back" href={import.meta.env.BASE_URL}>← niigaki</a>
+  <div class="ui" data-slug={piece.slug}>
+    <h1>{piece.title}</h1>
+    <p id="status">{piece.description}</p>
+    <button id="play">PLAY</button>
+  </div>
+</Base>
+
+<script>
+  import { mount } from "../lib/player";
+  import { pieces } from "../pieces";
+
+  const ui = document.querySelector<HTMLElement>(".ui")!;
+  mount(pieces.find((p) => p.slug === ui.dataset.slug)!, {
+    canvas: document.querySelector("canvas")!,
+    button: document.querySelector("button")!,
+    status: document.querySelector("#status")!,
+  });
+</script>
+
+<style>
+  :global(body) { height: 100vh; overflow: hidden; }
+  canvas { position: fixed; inset: 0; }
+  .back { position: fixed; top: 1.2rem; left: 1.5rem; opacity: .5; text-decoration: none; font-size: .85rem; letter-spacing: .15em; }
+  .ui { position: fixed; left: 0; right: 0; bottom: 12%; text-align: center; }
+  h1 { font-weight: 300; letter-spacing: .3em; font-size: 1.4rem; margin: 0 0 .4rem; }
+  p { opacity: .6; font-size: .85rem; margin: 0 0 1.4rem; }
+  button { background: none; color: inherit; border: 1px solid #d8dbe2; padding: .6rem 2.2rem; font: inherit; letter-spacing: .2em; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+</style>

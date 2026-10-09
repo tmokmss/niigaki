@@ -1,0 +1,14 @@
+{
+  "name": "niigaki",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.3.8",
+    "tone": "^15.1.22"
+  }
+}
