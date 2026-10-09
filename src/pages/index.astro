@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+import { pieces } from "../pieces";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+<Base title="niigaki">
+  <main>
+    <h1>niigaki</h1>
+    <p class="lead">Claude が書いた、ブラウザで鳴るピアノ小品集</p>
+    <ul>
+      {pieces.map((p) => (
+        <li>
+          <a href={`${base}/${p.slug}/`}>{p.title}</a>
+          <span>{p.description}</span>
+        </li>
+      ))}
+    </ul>
+  </main>
+</Base>
+
+<style>
+  main { max-width: 32rem; margin: 18vh auto; padding: 0 1.5rem; }
+  h1 { font-weight: 300; letter-spacing: .3em; font-size: 1.6rem; margin: 0 0 .4rem; }
+  .lead { opacity: .6; font-size: .9rem; margin: 0 0 3rem; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { display: flex; justify-content: space-between; align-items: baseline; padding: 1rem 0; border-top: 1px solid #2a2e38; }
+  li a { text-decoration: none; letter-spacing: .2em; font-size: 1.1rem; }
+  li a:hover { opacity: .7; }
+  li span { opacity: .5; font-size: .8rem; }
+</style>
