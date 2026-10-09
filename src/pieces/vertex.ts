@@ -50,5 +50,5 @@ export const vertex: ChipPiece = {
   description: "pulse / triangle / noise",
   bpm: 150,
   bars,
-  final: Am,
+  loopFrom: 8,
 };

@@ -12,17 +12,13 @@ export function mount(piece: Piece, els: { canvas: HTMLCanvasElement; button: HT
   const label = els.status.textContent;
   let playing = false;
 
-  const stopped = () => {
-    playing = false;
-    els.button.textContent = "PLAY";
-  };
-
   els.button.addEventListener("click", async () => {
     if (playing) {
       transport.stop();
       transport.cancel();
       kit.releaseAll();
-      stopped();
+      playing = false;
+      els.button.textContent = "PLAY";
       return;
     }
     els.button.disabled = true;
@@ -34,14 +30,15 @@ export function mount(piece: Piece, els: { canvas: HTMLCanvasElement; button: HT
 
     transport.cancel();
     transport.position = 0;
-    const { events, end } = piece.kind === "chip" ? renderChip(piece) : renderPiano(piece);
+    const { events, loopStart, end } = piece.kind === "chip" ? renderChip(piece) : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
         draw.schedule(() => visual(e), time);
       }, e.t);
     }
-    transport.schedule((time) => draw.schedule(stopped, time), end);
+    transport.setLoopPoints(loopStart, end);
+    transport.loop = true;
     transport.start("+0.1");
     playing = true;
     els.button.textContent = "STOP";

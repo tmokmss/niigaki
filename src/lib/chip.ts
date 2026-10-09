@@ -8,7 +8,9 @@ export function renderChip(piece: ChipPiece) {
   const { events, add } = collector();
 
   let t = 0.2;
-  for (const bar of piece.bars) {
+  let loopStart = 0;
+  for (const [index, bar] of piece.bars.entries()) {
+    if (index === piece.loopFrom) loopStart = t;
     const [root, third, fifth] = bar.c;
 
     if (bar.arp) {
@@ -45,15 +47,7 @@ export function renderChip(piece: ChipPiece) {
     t += beat * 4;
   }
 
-  const [root] = piece.final;
-  add(t, "lead", transpose(root, 24), beat * 3, 0.8);
-  add(t, "harm", transpose(root, 12), beat * 3, 0.7);
-  add(t, "arp", piece.final, beat * 3, 0.6);
-  add(t, "bass", transpose(root, -24), beat * 3, 0.9);
-  add(t, "kick", "C1", 0.3, 1);
-  add(t, "crash", [], 2.5, 0.9);
-
-  return { events, end: t + beat * 5 };
+  return { events, loopStart, end: t };
 }
 
 export function chipKit(bpm: number): Kit {
