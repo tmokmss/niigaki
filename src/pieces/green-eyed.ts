@@ -113,20 +113,20 @@ const RUNS: Line[] = [
   [B, "F#5 D#5 B4 D#5 A4 B4 G4 A4 F#4:2 -:2"],
 ];
 
-// the opening motif chopped into a call, answered by a short fall
+// the opening motif chopped into a call over i-VI-VII-V, each call landing on a chord tone
 const INTRO: Line[] = [
-  [Em, "B4:3 B4:3 F#5:2 G5:3 A5:5"],
-  [Em, "-:8 G5:2 F#5:2 E5:4"],
-  [A, "B4:3 B4:3 F#5:2 G5:3 A5:5"],
-  [A, "-:8 B5:2 A5:2 F#5:4"],
-  [C, "B4:3 B4:3 F#5:2 G5:3 B5:5"],
-  [C, "-:8 G5:2 F#5:2 E5:4"],
-  [Cdim, "B4:3 B4:3 E5:2 G5:3 B5:5"],
-  [Cdim, "E6:4 D6:4 B5:4 G5:4"],
+  [Em, "B4:3 B4:3 F#5:2 G5:3 B5:5"],
+  [C, "-:8 C6:2 B5:2 G5:4"],
+  [D, "A4:3 A4:3 F#5:2 G5:3 A5:5"],
+  [B, "-:8 B5:2 A5:2 F#5:4"],
+  [Em, "B4:3 B4:3 F#5:2 G5:3 B5:5"],
+  [C, "-:8 G5:2 B5:2 E6:4"],
+  [D, "F#6:4 E6:4 D6:4 A5:4"],
+  [B, "D#6:4 B5:4 F#5:4 D#5:4"],
 ];
 
 const BUILD: Line[] = [
-  [C, "E5:2 G5:2 B5:2 E6:2 E5:2 G5:2 B5:2 E6:2"],
+  [Em, "E5:2 G5:2 B5:2 E6:2 E5:2 G5:2 B5:2 E6:2"],
   [D, "F#5:2 A5:2 D6:2 F#6:2 F#5:2 A5:2 D6:2 F#6:2"],
   [B, "F#6:2 D#6:2 B5:2 F#5:2 A5:4 B5:4"],
   [B, "D#6:4 F#6:4 B6:8"],
@@ -142,7 +142,7 @@ const full = { arp: true, bass: true, kick: true, snare: true, hat: 16 as const 
 
 // the last drop falls to a low B and breathes back into the sparse intro
 const bars: ChipBar[] = [
-  ...section(INTRO, as4, (i) => (i < 4 ? { arp: true, hat: 8 } : { arp: true, bass: true, kick: true, hat: 8 })),
+  ...section(INTRO, as4, (i) => ({ arp: true, bass: true, kick: i >= 4, hat: 8 })),
   ...section(BUILD, as4, (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
   ...section([...THEME, ...THEME_HIGH], swung, (i) => ({ ...full, crash: i === 0 || i === 8 })),
   ...section(CHORDS.slice(0, 8), swung, (i) => ({ arp: true, bass: true, kick: true, hat: 8, crash: i === 0 })),
