@@ -1,16 +1,13 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）にアレンジしてローカルで聞けるようにする。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
 
-原曲の楽譜を書き起こした曲は公開しない。ローカルのブランチにだけコミットし、push しない。
+## 1. worktree を用意する
 
-## 1. ローカル用の worktree を用意する
-
-- niigaki のリポジトリで `git branch --list 'local/*'` を見て、一番新しいアレンジ用ブランチから切る（3 拍子・タイ `~`・弾幕 `visual: "danmaku"` はそこにしか無い）
-- `git worktree add .claude/worktrees/<slug> -b local/<slug> <base>` → その中で `npm ci`
+- niigaki のリポジトリで `git fetch origin` し、`git worktree add .claude/worktrees/<slug> -b <slug> origin/main` → その中で `npm ci`
 - dev サーバーは公開用（4377）と分け、空きポートで `npm run dev -- --port <port>` を起動する
 
 ## 2. 楽譜を探す
@@ -51,8 +48,8 @@ description: niigaki リポジトリで、東方 Project の原曲をチップ�
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
 - worktree の中で `npx tsx ~/.claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
-- ブラウザのログ（`.playwright-cli/`）を消してから、ローカルのブランチにコミットする。push しない
+- ブラウザのログ（`.playwright-cli/`）を消してからコミットし、push して main への PR を作る
 
 ## 7. 報告する
 
-ローカルの URL（`http://localhost:<port>/niigaki/<slug>/`）、ブランチ名、楽譜の出典、目で読んだので読み違いがあり得ることを伝える。
+ローカルの URL（`http://localhost:<port>/niigaki/<slug>/`）、PR の URL、楽譜の出典、目で読んだので読み違いがあり得ることを伝える。

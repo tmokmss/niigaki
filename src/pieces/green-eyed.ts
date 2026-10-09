@@ -1,5 +1,4 @@
 // Chiptune arrangement of 緑眼のジェラシー (ZUN, 東方地霊殿), from ALFetite's piano transcription.
-// Kept on a local branch for personal listening; not for publishing.
 import { transpose } from "../lib/score";
 import type { ChipBar, ChipPiece } from "./types";
 
