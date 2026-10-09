@@ -17,13 +17,12 @@ export function danmaku(canvas: HTMLCanvasElement) {
   let ringSpin = 0;
   let spiral = 0;
   let clock = 0;
-  let px = canvas.width / 2;
   let last = performance.now();
 
   const boss = () => ({ x: canvas.width / 2 + Math.sin(clock * 0.5) * canvas.width * 0.12, y: canvas.height * 0.26 });
-  const player = () => ({ x: px, y: canvas.height * 0.86 });
 
-  const shoot = (angle: number, speed: number, r: number, h: number, from = boss()) => {
+  const shoot = (angle: number, speed: number, r: number, h: number) => {
+    const from = boss();
     bullets.push({ x: from.x, y: from.y, vx: Math.cos(angle) * speed * dpr, vy: Math.sin(angle) * speed * dpr, r: r * dpr, hue: h });
     if (bullets.length > MAX_BULLETS) bullets.splice(0, bullets.length - MAX_BULLETS);
   };
@@ -100,24 +99,6 @@ export function danmaku(canvas: HTMLCanvasElement) {
     circle(b.x, b.y, 7 * dpr, "rgba(255,255,255,0.9)");
     ctx.globalCompositeOperation = "source-over";
 
-    const p = player();
-    let target = W / 2 + Math.sin(clock * 0.7) * W * 0.22;
-    for (const u of bullets) {
-      const dx = p.x - u.x;
-      const dy = p.y - u.y;
-      if (Math.abs(dx) < 70 * dpr && Math.abs(dy) < 90 * dpr) target += Math.sign(dx || 1) * 60 * dpr;
-    }
-    px += (Math.min(W * 0.9, Math.max(W * 0.1, target)) - px) * Math.min(1, dt * 5);
-    const s = 9 * dpr;
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y - s * 1.4);
-    ctx.lineTo(p.x - s, p.y + s);
-    ctx.lineTo(p.x + s, p.y + s);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(240,240,255,0.9)";
-    ctx.fill();
-    circle(p.x, p.y, 2.5 * dpr, "#ff4060");
-
     pulse *= Math.pow(0.02, dt);
     requestAnimationFrame(draw);
   };
@@ -138,8 +119,7 @@ export function danmaku(canvas: HTMLCanvasElement) {
     if (e.voice === "kick") pulse = 1;
     if (e.voice === "snare" && e.vel >= 0.8) {
       const b = boss();
-      const p = player();
-      const aim = Math.atan2(p.y - b.y, p.x - b.x);
+      const aim = Math.atan2(canvas.height - b.y, canvas.width * (0.2 + Math.random() * 0.6) - b.x);
       for (let i = -2; i <= 2; i++) shoot(aim + i * 0.12, 260, 4.5, 355);
     }
     if (e.voice === "crash") {
