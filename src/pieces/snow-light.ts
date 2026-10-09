@@ -1,5 +1,5 @@
 import { BRIDGE, V } from "./chords";
-import type { Bar, Piece } from "./types";
+import type { Bar, PianoPiece } from "./types";
 
 const A: Bar[] = [
   { c: V.Dbmaj9, m: [["Eb5", 1], ["F5", 1], ["Ab5", 2]] },
@@ -14,7 +14,8 @@ const A: Bar[] = [
 
 const all = { lh: true, mel: true, pad: true };
 
-export const snowLight: Piece = {
+export const snowLight: PianoPiece = {
+  kind: "piano",
   slug: "snow-light",
   title: "Snow Light",
   description: "piano / pad",

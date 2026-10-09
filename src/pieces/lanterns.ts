@@ -1,5 +1,5 @@
 import { BRIDGE, V } from "./chords";
-import type { Bar, Piece } from "./types";
+import type { Bar, PianoPiece } from "./types";
 
 // bar 1 is the hook: leap up a fifth, then fall through the pentatonic
 const HOOK: Bar[] = [
@@ -13,7 +13,8 @@ const HOOK: Bar[] = [
   { c: V.Absus, c2: V.Ab, m: [["Ab5", 4]] },
 ];
 
-export const lanterns: Piece = {
+export const lanterns: PianoPiece = {
+  kind: "piano",
   slug: "lanterns",
   title: "Lanterns",
   description: "piano / bell / pad",
