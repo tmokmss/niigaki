@@ -94,7 +94,7 @@ export function bossaKit(bpm: number): Kit {
   // the dry saxophone sounds thin: soften its top and give it a longer, deeper hall of its own on top of the room
   const saxRoom = new Tone.Filter(3200, "lowpass");
   saxRoom.chain(new Tone.Reverb({ decay: 3.2, wet: 0.45 }), reverb);
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -11, reverb);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -14, reverb);
   const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.6, -11, saxRoom);
 
   const bass = new Tone.PolySynth(Tone.Synth, {
