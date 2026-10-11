@@ -2,22 +2,24 @@
 // The F-sharp-minor chorus is left out: the verses in F minor step up a whole tone into the G-minor chorus.
 import type { BossaBar, BossaPiece } from "./types";
 
-const Fm9 = ["F4", "Ab4", "C5", "Eb5", "G5"];
-const Fm11 = ["F4", "Ab4", "Bb4", "C5", "Eb5"];
-const Dbmaj9 = ["Db4", "F4", "Ab4", "C5", "Eb5"];
-const Eb69 = ["Eb4", "G4", "Bb4", "C5", "F5"];
-const Eb9sus4 = ["Eb4", "Ab4", "Bb4", "Db5", "F5"];
-const Bbm9 = ["Bb3", "Db4", "F4", "Ab4", "C5"];
-const Abmaj9 = ["Ab3", "C4", "Eb4", "G4", "Bb4"];
-const C7b13 = ["C4", "E4", "Ab4", "Bb4", "Db5"];
-const Cm9 = ["C4", "Eb4", "G4", "Bb4", "D5"];
-const D7sus4b9 = ["D4", "G4", "C5", "Eb5"];
-const D7b13 = ["D4", "Gb4", "Bb4", "C5"];
-const Gm9 = ["G3", "Bb3", "D4", "F4", "A4"];
-const Gm69 = ["G3", "Bb3", "D4", "E4", "A4"];
-const Ebmaj9 = ["Eb4", "G4", "Bb4", "D5", "F5"];
-const F9 = ["F4", "A4", "C5", "Eb5", "G5"];
-const F9sus4 = ["F4", "Bb4", "C5", "Eb5", "G5"];
+// the thumb plays the first note; the fingers the rest, kept below the flute
+
+const Fm9 = ["F2", "Ab3", "Eb4", "G4", "C5"];
+const Fm11 = ["F2", "Ab3", "Eb4", "Bb4", "C5"];
+const Dbmaj9 = ["Db3", "F3", "C4", "Eb4", "Ab4"];
+const Eb69 = ["Eb3", "G3", "C4", "F4", "Bb4"];
+const Eb9sus4 = ["Eb3", "Ab3", "Db4", "F4", "Bb4"];
+const Bbm9 = ["Bb2", "Db4", "F4", "Ab4", "C5"];
+const Abmaj9 = ["Ab2", "C4", "Eb4", "G4", "Bb4"];
+const C7b13 = ["C3", "E3", "Bb3", "Db4", "Ab4"];
+const Cm9 = ["C3", "Eb4", "G4", "Bb4", "D5"];
+const D7sus4b9 = ["D3", "G3", "C4", "Eb4"];
+const D7b13 = ["D3", "Gb3", "Bb3", "C4"];
+const Gm9 = ["G2", "Bb3", "F4", "A4", "D5"];
+const Gm69 = ["G2", "Bb3", "E4", "A4", "D5"];
+const Ebmaj9 = ["Eb3", "G3", "D4", "F4", "Bb4"];
+const F9 = ["F2", "A3", "Eb4", "G4", "C5"];
+const F9sus4 = ["F2", "Bb3", "Eb4", "G4", "C5"];
 
 // [chord, chord for beats 3-4 or null, melody in sixteenths]
 type Line = [string[], string[] | null, string];

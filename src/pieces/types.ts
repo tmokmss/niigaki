@@ -166,9 +166,9 @@ export type DubstepPiece = {
   bars: DubstepBar[];
 };
 
-// c: chord with its 7th/9th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
-// the nylon guitar always comps the chord in the two-bar bossa pattern
-// beat: shaker, cross-stick on the bossa clave and a soft kick; bass: root and fifth with pickups into the next chord
+// c: the root for the guitarist's thumb (E2-Eb3), then three or four notes for the fingers (G3-C5); c2: chord for beats 3-4; m: [note, sixteenths]
+// the nylon guitar always plays: the thumb on 1 and 3, the fingers in the two-bar bossa pattern
+// beat: eighth-note shaker, cross-stick on the bossa clave and a soft kick; bass: doubles the thumb with pickups into the next chord
 export type BossaBar = {
   c: string[];
   c2?: string[];
