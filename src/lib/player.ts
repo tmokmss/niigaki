@@ -8,7 +8,7 @@ import type { Kit } from "./score";
 
 export function mount(
   piece: Piece,
-  els: { canvas: HTMLCanvasElement; button: HTMLButtonElement; status: HTMLElement; timbre?: HTMLSelectElement },
+  els: { canvas: HTMLCanvasElement; button: HTMLButtonElement; status: HTMLElement; volume: HTMLInputElement; timbre?: HTMLSelectElement },
 ) {
   const chipKits = new Map<string, Kit>();
   const chip = (bpm: number, t: NonNullable<ChipPiece["timbre"]>) => {
@@ -26,6 +26,11 @@ export function mount(
   const visual =
     piece.kind === "piano" ? sparks(els.canvas) : piece.visual === "danmaku" ? danmaku(els.canvas) : pixels(els.canvas);
   const transport = Tone.getTransport();
+  const setVolume = () => {
+    Tone.getDestination().volume.value = Tone.gainToDb(Number(els.volume.value) / 100);
+  };
+  els.volume.addEventListener("input", setVolume);
+  setVolume();
   const draw = Tone.getDraw();
   const label = els.status.textContent;
   let playing = false;

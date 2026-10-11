@@ -15,6 +15,7 @@ const { piece } = Astro.props;
     <h1>{piece.title}</h1>
     <p id="status">{piece.description}</p>
     <button id="play">PLAY</button>
+    <label class="volume">VOL <input id="volume" type="range" min="0" max="100" value="100" /></label>
     {import.meta.env.DEV && piece.kind === "chip" && <select id="timbre" data-timbre={piece.timbre ?? "square"}></select>}
   </div>
 </Base>
@@ -34,6 +35,7 @@ const { piece } = Astro.props;
     canvas: document.querySelector("canvas")!,
     button: document.querySelector("button")!,
     status: document.querySelector("#status")!,
+    volume: document.querySelector("#volume")!,
     timbre,
   });
 </script>
@@ -47,5 +49,7 @@ const { piece } = Astro.props;
   p { opacity: .6; font-size: .85rem; margin: 0 0 1.4rem; }
   button { background: rgba(13, 15, 20, .75); color: inherit; border: 1px solid #d8dbe2; padding: .6rem 2.2rem; font: inherit; letter-spacing: .2em; cursor: pointer; }
   button:disabled { opacity: .4; cursor: default; }
+  .volume { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-top: .8rem; font-size: .75rem; letter-spacing: .15em; opacity: .7; }
+  .volume input { width: 8rem; accent-color: #d8dbe2; }
   select { display: block; margin: .8rem auto 0; background: rgba(13, 15, 20, .75); color: inherit; border: 1px solid #d8dbe2; padding: .3rem .6rem; font: inherit; font-size: .8rem; letter-spacing: .1em; }
 </style>
