@@ -16,6 +16,17 @@ const BASSLINES = {
   fifth: [-24, -12, -17, -12],
 };
 
+// lead, harmony and arpeggio oscillators; decay/sustain shape the lead, echo is the delay's wet level
+const TIMBRES = {
+  square: { lead: { type: "square" }, harm: { type: "pulse", width: 0.25 }, arp: { type: "pulse", width: 0.125 }, leadVol: -16, decay: 0.1, sustain: 0.7, vibrato: 0.08, echo: 0.18 },
+  reed: { lead: { type: "pulse", width: 0.125 }, harm: { type: "pulse", width: 0.25 }, arp: { type: "square" }, leadVol: -18, decay: 0.1, sustain: 0.7, vibrato: 0.16, echo: 0.18 },
+  bright: { lead: { type: "pulse", width: 0.25 }, harm: { type: "square" }, arp: { type: "pulse", width: 0.125 }, leadVol: -16, decay: 0.1, sustain: 0.6, vibrato: 0.05, echo: 0.1 },
+  flute: { lead: { type: "triangle" }, harm: { type: "pulse", width: 0.25 }, arp: { type: "pulse", width: 0.125 }, leadVol: -9, decay: 0.1, sustain: 0.8, vibrato: 0.1, echo: 0.35 },
+  pluck: { lead: { type: "square" }, harm: { type: "pulse", width: 0.125 }, arp: { type: "pulse", width: 0.25 }, leadVol: -15, decay: 0.2, sustain: 0.25, vibrato: 0, echo: 0.15 },
+} as const;
+
+export const timbres = Object.keys(TIMBRES) as (keyof typeof TIMBRES)[];
+
 export function renderChip(piece: ChipPiece) {
   const beat = 60 / piece.bpm;
   const six = beat / 4;
@@ -82,25 +93,26 @@ export function renderChip(piece: ChipPiece) {
   return { events, end: t };
 }
 
-export function chipKit(bpm: number): Kit {
+export function chipKit(bpm: number, timbre: ChipPiece["timbre"] = "square"): Kit {
+  const t = TIMBRES[timbre];
   const out = new Tone.Compressor(-18, 3).toDestination();
-  const delay = new Tone.FeedbackDelay({ delayTime: (60 / bpm) * 0.75, feedback: 0.25, wet: 0.18 }).connect(out);
+  const delay = new Tone.FeedbackDelay({ delayTime: (60 / bpm) * 0.75, feedback: 0.25, wet: t.echo }).connect(out);
 
   const lead = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: "square" },
-    envelope: { attack: 0.005, decay: 0.1, sustain: 0.7, release: 0.05 },
-    volume: -16,
+    oscillator: t.lead,
+    envelope: { attack: 0.005, decay: t.decay, sustain: t.sustain, release: 0.05 },
+    volume: t.leadVol,
   });
-  lead.chain(new Tone.Vibrato(6, 0.08), delay);
+  lead.chain(new Tone.Vibrato(6, t.vibrato), delay);
 
   const harm = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: "pulse", width: 0.25 },
+    oscillator: t.harm,
     envelope: { attack: 0.005, decay: 0.1, sustain: 0.6, release: 0.05 },
     volume: -22,
   }).connect(delay);
 
   const arp = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: "pulse", width: 0.125 },
+    oscillator: t.arp,
     envelope: { attack: 0.002, decay: 0.06, sustain: 0.2, release: 0.02 },
     volume: -24,
   }).connect(out);
