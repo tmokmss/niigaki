@@ -5,6 +5,15 @@ import { collector, midi, transpose, type Kit, type NoteEvent } from "./score";
 // in sixteenth steps (a 4/4 bar here holds two 2/4 bars of the usual notation), as João Gilberto plays The Girl from Ipanema:
 // every bar the fingers pinch the whole chord on 1, 2 and the and of 3, and let it ring; the cross-stick plays the two-bar bossa clave
 const FINGERS = [0, 4, 10];
+// fingerpicking for the quiet bars: [step, which string counting up from the fifth over the root]
+const ARP = [
+  [2, 1],
+  [4, 2],
+  [6, 3],
+  [10, 2],
+  [12, 3],
+  [14, 4],
+];
 const CLAVE = [
   [0, 6, 12],
   [4, 10],
@@ -31,10 +40,18 @@ export function renderBossa(piece: BossaPiece) {
       const c = at(step);
       return [transpose(c[0], 7), ...c.slice(1)].sort((x, y) => midi(x) - midi(y));
     };
-    FINGERS.forEach((s, k) => {
-      const until = FINGERS[k + 1] ?? 16;
-      add(t + s * six + rand() * 0.008, "guitar", chord(s), (until - s) * six, s ? 0.45 : 0.75);
-    });
+    if (bar.arp) {
+      // one string at a time between the thumb's notes, up and back down, each left ringing to the half bar
+      for (const [s, k] of ARP) {
+        const c = chord(s);
+        add(t + s * six, "guitar", c[Math.min(k, c.length - 1)], (8 - (s % 8)) * six, 0.75 + rand() * 0.1);
+      }
+    } else {
+      FINGERS.forEach((s, k) => {
+        const until = FINGERS[k + 1] ?? 16;
+        add(t + s * six + rand() * 0.008, "guitar", chord(s), (until - s) * six, s ? 0.45 : 0.75);
+      });
+    }
     for (const s of [0, 8]) add(t + s * six, "thumb", thumb(s), 8 * six, 0.7);
     if (bar.bass) {
       // the bass doubles the thumb, each half pushed into the next by an eighth-note pickup

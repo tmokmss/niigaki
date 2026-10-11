@@ -173,6 +173,8 @@ export type BossaBar = {
   c: string[];
   c2?: string[];
   m?: [string, number][];
+  // the fingers pick the chord one string at a time instead
+  arp?: boolean;
   beat?: boolean;
   bass?: boolean;
   crash?: boolean;
