@@ -1,5 +1,5 @@
 // Chiptune arrangement of 緑眼のジェラシー (ZUN, 東方地霊殿), from ALFetite's piano transcription.
-import { transpose } from "../lib/score";
+import { midi, transpose } from "../lib/score";
 import type { ChipBar, ChipPiece } from "./types";
 
 const Em = ["E4", "G4", "B4"];
@@ -112,42 +112,109 @@ const RUNS: Line[] = [
   [B, "F#5 D#5 B4 D#5 A4 B4 G4 A4 F#4:2 -:2"],
 ];
 
-// the opening motif chopped into a call over i-VI-VII-V, each call landing on a chord tone
-const INTRO: Line[] = [
-  [Em, "B4:3 B4:3 F#5:2 G5:3 B5:5"],
-  [C, "-:8 C6:2 B5:2 G5:4"],
-  [D, "A4:3 A4:3 F#5:2 G5:3 A5:5"],
-  [B, "-:8 B5:2 A5:2 F#5:4"],
-  [Em, "B4:3 B4:3 F#5:2 G5:3 B5:5"],
-  [C, "-:8 G5:2 B5:2 E6:4"],
-  [D, "F#6:4 E6:4 D6:4 A5:4"],
-  [B, "D#6:4 B5:4 F#5:4 D#5:4"],
+// the theme with its own chords; the fourth and sixth bars land on E, a tone of both A and C, instead of F#
+const HOOK: Line[] = THEME.map(([c, s], i) => [c, i === 3 || i === 5 ? s.replace("F#5", "E5") : s]);
+
+// the theme's B-F#-G head, repeated ever shorter
+const BUILD: Line[] = [
+  [Em, "B4:6 F#5:6 G5:4"],
+  [Em, "B4:4 F#5:2 G5:2 B4:4 F#5:2 G5:2"],
+  [C, "E5:2 B5 C6 E5:2 B5 C6 E5:2 B5 C6 E5:2 B5 C6"],
+  [B, "D#6 F#6 B6 D#6 F#6 B6 D#6 F#6 B6:8"],
 ];
 
-const BUILD: Line[] = [
-  [Em, "E5:2 G5:2 B5:2 E6:2 E5:2 G5:2 B5:2 E6:2"],
-  [D, "F#5:2 A5:2 D6:2 F#6:2 F#5:2 A5:2 D6:2 F#6:2"],
-  [B, "F#6:2 D#6:2 B5:2 F#5:2 A5:4 B5:4"],
-  [B, "D#6:4 F#6:4 B6:8"],
+// long notes struck again: step 3 gives a syncopated 3+3+...+2+2, step 2 straight eighths
+const chop = (step: number) => (ns: Note[]): Note[] =>
+  ns.flatMap(([p, n]) => {
+    if (p === "~" || p === "-" || n < 2 * step) return [[p, n]];
+    const out: Note[] = [];
+    for (let r = n; r > 0; ) {
+      const s = r === 4 || r === 2 ? 2 : Math.min(step, r);
+      out.push([p, s]);
+      r -= s;
+    }
+    return out;
+  });
+
+// every other note jumps an octave, up from below C6 and down from above
+const leap = (ns: Note[]): Note[] => {
+  let i = 0;
+  return ns.map(([p, n]) =>
+    p === "~" || p === "-" || i++ % 2 === 0 ? [p, n] : [transpose(p, midi(p) < midi("C6") ? 12 : -12), n],
+  );
+};
+
+// the next chord tone above (dir 1) or below (dir -1) a note
+const next = (c: string[], p: string, dir: number) => {
+  let k = dir;
+  while (!c.some((x) => (((midi(x) - midi(p) - k) % 12) + 12) % 12 === 0)) k += dir;
+  return transpose(p, k);
+};
+
+// a long note becomes sixteenths running up and back through the chord from it
+const arpeggio = (c: string[]) => (ns: Note[]): Note[] =>
+  ns.flatMap(([p, n]) => {
+    if (p === "~" || p === "-" || n < 6) return [[p, n]];
+    const dir = midi(p) < midi("C6") ? 1 : -1;
+    const a = next(c, p, dir);
+    const b = next(c, a, dir);
+    return Array.from({ length: n }, (_, i): Note => [[p, a, b, a][i % 4], 1]);
+  });
+
+// the notes between sixteenths a and b
+const span = (ns: Note[], a: number, b: number): Note[] => {
+  let x = 0;
+  const out: Note[] = [];
+  for (const [p, n] of ns) {
+    const from = Math.max(x, a);
+    const to = Math.min(x + n, b);
+    if (to > from) out.push([p, to - from]);
+    x += n;
+  }
+  return out;
+};
+
+// the first k sixteenths repeat up to the last beat, which lands as written
+const again = (k: number) => (ns: Note[]): Note[] => [
+  ...Array.from({ length: 12 / k }, () => span(ns, 0, k)).flat(),
+  ...span(ns, 12, 16),
 ];
 
 type Flags = Omit<ChipBar, "c" | "m">;
-const section = (lines: Line[], toNotes: (c: string[], s: string) => Note[], flags: (i: number) => Flags): ChipBar[] =>
-  lines.map(([c, s], i) => ({ c, m: toNotes(c, s), ...flags(i) }));
+const section = (lines: Line[], toNotes: (c: string[], s: string, i: number) => Note[], flags: (i: number) => Flags): ChipBar[] =>
+  lines.map(([c, s], i) => ({ c, m: toNotes(c, s, i), ...flags(i) }));
 
-const as4 = (_: string[], s: string) => m(s);
 const swung = (_: string[], s: string) => tresillo(s);
 const full = { arp: true, bass: true, kick: true, snare: true, hat: 16 as const };
 
-// the last drop falls to a low B and breathes back into the sparse intro
+const DROP2: Line[] = CHORDS.map(([c, s], i) => [c, i === 7 ? s.replace("A4", "G4") : s]);
+
+// each drop keeps its first two bars as written; the last bar falls to a low B that resolves into the intro
 const bars: ChipBar[] = [
-  ...section(INTRO, as4, (i) => ({ arp: true, bass: true, kick: i >= 4, hat: 8 })),
-  ...section(BUILD, as4, (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
-  ...section([...THEME, ...THEME_HIGH], swung, (i) => ({ ...full, crash: i === 0 || i === 8 })),
-  ...section(CHORDS.slice(0, 8), swung, (i) => ({ arp: true, bass: true, kick: true, hat: 8, crash: i === 0 })),
-  ...section(CHORDS.slice(8), swung, (i) => ({ ...full, roll: i === 7 })),
-  ...section(RUNS, flourish, (i) => ({ ...full, harm: i >= 8, crash: i === 0 || i === 8, roll: i === 15 })),
-  ...section([...THEME, ...THEME_END], swung, (i) => ({ ...full, harm: true, crash: i === 0 })),
+  ...section(HOOK, swung, (i) => ({ arp: true, kick: i >= 4, hat: i >= 4 ? 8 : undefined })),
+  ...section(BUILD, (_, s) => m(s), (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
+  ...section(
+    [...HOOK, ...THEME_HIGH],
+    (_, s, i) => (i < 2 ? tresillo(s) : i === 15 ? again(6)(tresillo(s)) : chop(i < 8 ? 3 : 2)(tresillo(s))),
+    (i) => ({ ...full, crash: i === 0 || i === 8 }),
+  ),
+  ...section(CHORDS.slice(0, 8), swung, (i) => ({ arp: true, crash: i === 0 })),
+  ...section(
+    RUNS.slice(8),
+    (c, s, i) => (i < 4 ? again(4)(flourish(c, s)) : flourish(c, s)),
+    (i) => ({ arp: true, bass: true, kick: true, snare: i >= 4, hat: i < 4 ? 8 : 16, roll: i === 7 }),
+  ),
+  ...section(DROP2, (c, s, i) => (i < 2 ? tresillo(s) : arpeggio(c)(tresillo(s))), (i) => ({
+    ...full,
+    harm: i >= 8,
+    crash: i === 0 || i === 8,
+    roll: i === 15,
+  })),
+  ...section(
+    [...HOOK, ...THEME_END],
+    (_, s, i) => (i < 2 || i === 15 ? tresillo(s) : leap(chop(2)(tresillo(s)))),
+    (i) => ({ ...full, harm: true, crash: i === 0 || i === 8 }),
+  ),
 ];
 
 export const greenEyed: ChipPiece = {
