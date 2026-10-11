@@ -27,7 +27,7 @@ export function renderBossa(piece: BossaPiece) {
     const t = i * barLen;
     const at = (step: number) => (step >= 8 && bar.c2 ? bar.c2 : bar.c);
 
-    for (const s of GUITAR[i % 2]) add(t + s * six + rand() * 0.008, "guitar", at(s), RING * six, 0.5);
+    for (const s of GUITAR[i % 2]) add(t + s * six + rand() * 0.008, "guitar", at(s), RING * six, s % 4 ? 0.6 : 0.8);
     if (bar.bass) {
       const next = piece.bars[(i + 1) % piece.bars.length];
       for (const s of [0, 8]) {
@@ -73,19 +73,20 @@ export function bossaKit(bpm: number): Kit {
   out.chain(new Tone.Limiter(-1), Tone.getDestination());
   const reverb = new Tone.Reverb({ decay: 2.2, wet: 0.25 }).connect(out);
 
-  // nylon strings: Karplus-Strong plucks with the top rolled off, a pool so a chord's strings ring together
-  const nylon = new Tone.Filter(2400, "lowpass").connect(reverb);
-  const strings = Array.from({ length: 12 }, () =>
-    new Tone.PluckSynth({ attackNoise: 0.6, dampening: 3200, resonance: 0.96, release: 0.4, volume: -5 }).connect(nylon),
-  );
-  let next = 0;
+  // nylon-string guitar samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0)
+  const guitar = new Tone.Sampler({
+    urls: Object.fromEntries(["E3", "A3", "C#4", "E4", "A4", "C#5", "E5", "A5"].map((n) => [n, `${n.replace("#", "s")}.mp3`])),
+    baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/",
+    release: 0.25,
+    volume: -8,
+  }).connect(reverb);
 
   // flute: a sine with a little second and third harmonic, a slow attack, vibrato and a puff of breath on each note
   const flute = new Tone.Synth({
     oscillator: { type: "custom", partials: [1, 0.22, 0.07] },
     envelope: { attack: 0.05, decay: 0.2, sustain: 0.85, release: 0.25 },
     portamento: 0.01,
-    volume: -16,
+    volume: -19,
   });
   flute.chain(new Tone.Vibrato(5, 0.06), new Tone.FeedbackDelay({ delayTime: (60 / bpm) * 0.75, feedback: 0.2, wet: 0.12 }), reverb);
   const breath = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.01, decay: 0.08, sustain: 0 }, volume: -40 });
@@ -121,10 +122,8 @@ export function bossaKit(bpm: number): Kit {
   return {
     play(e: NoteEvent, time: number) {
       if (e.voice === "guitar") {
-        e.notes.forEach((n, k) => {
-          const s = strings[next++ % strings.length];
-          s.triggerAttackRelease(n, e.dur, time + k * 0.008);
-        });
+        // thumb and fingers pinch the strings together, the lowest a hair early
+        e.notes.forEach((n, k) => guitar.triggerAttackRelease(n, e.dur, time + k * 0.006, e.vel));
       } else if (e.voice === "lead") {
         flute.triggerAttackRelease(e.notes[0], e.dur, time, e.vel);
         breath.triggerAttackRelease(0.08, time, e.vel);
@@ -142,6 +141,7 @@ export function bossaKit(bpm: number): Kit {
     },
     releaseAll() {
       flute.triggerRelease();
+      guitar.releaseAll();
       bass.releaseAll();
     },
   };
