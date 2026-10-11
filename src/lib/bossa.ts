@@ -102,13 +102,20 @@ export function bossaKit(bpm: number): Kit {
   const reverb = new Tone.Reverb({ decay: 2.4, wet: 0.3 }).connect(out);
 
   // nylon-string guitar and flute samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0), in the same room
-  const sampler = (dir: string, notes: string[], release: number, volume: number) =>
-    new Tone.Sampler({
-      urls: Object.fromEntries(notes.map((n) => [n, `${n.replace("#", "s")}.mp3`])),
-      baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${dir}/`,
-      release,
-      volume,
-    }).connect(reverb);
+  // the recordings open with silence and, for the low flute, up to 0.2 s of breath: each starts where it reaches a tenth of its peak
+  const trim = (buf: Tone.ToneAudioBuffer) => {
+    const ch = buf.getChannelData(0);
+    const peak = ch.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
+    return buf.slice(Math.max(0, ch.findIndex((x) => Math.abs(x) >= peak / 10) / buf.sampleRate - 0.005));
+  };
+  const sampler = (dir: string, notes: Tone.Unit.Note[], release: number, volume: number) => {
+    const s = new Tone.Sampler({ release, volume }).connect(reverb);
+    for (const n of notes) {
+      const url = `https://nbrosowsky.github.io/tonejs-instruments/samples/${dir}/${n.replace("#", "s")}.mp3`;
+      new Tone.ToneAudioBuffer(url, (buf) => s.add(n, trim(buf)));
+    }
+    return s;
+  };
   const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 1, -10);
   const flute = sampler("flute", ["C4", "E4", "A4", "C5", "E5", "A5", "C6", "E6", "A6", "C7"], 0.4, -10);
 
