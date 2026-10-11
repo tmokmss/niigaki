@@ -1,0 +1,455 @@
+<meta charset="utf-8">
+<title>引っかかり計測</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+1+Code:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one 760px reading column; charts and the candidate grid may widen to 1040px. Pixel face only for headings, like a chip title screen. */
+:root {
+  --bg: #f5f7f4;
+  --panel: #ffffff;
+  --fg: #15201a;
+  --muted: #59665e;
+  --faint: #8c978f;
+  --rule: #d8dfd9;
+  --accent: #1d7350;
+  --hook: #b8336d;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --dot: #a3ada6;
+  --font-display: "DotGothic16", "Hiragino Kaku Gothic ProN", monospace;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --font-data: "M PLUS 1 Code", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1512; --panel: #161e1a; --fg: #e3ebe5; --muted: #9eaca3; --faint: #6f7d74; --rule: #2a3530;
+    --accent: #52c491; --hook: #ea72a3; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --dot: #5c6861;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1512; --panel: #161e1a; --fg: #e3ebe5; --muted: #9eaca3; --faint: #6f7d74; --rule: #2a3530;
+  --accent: #52c491; --hook: #ea72a3; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --dot: #5c6861;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.75; padding-inline: 16px; padding-block: 40px 80px; }
+main { max-width: 1040px; margin-inline: auto; display: grid; gap: 64px; }
+.col { max-width: 760px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(34px, 7vw, 56px); letter-spacing: 0.02em; }
+h2 { font-size: 26px; }
+h3 { font-size: 18px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); }
+.stack { display: grid; gap: 16px; }
+.lede { font-size: 17px; color: var(--muted); }
+section { display: grid; gap: 24px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.findings { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: f; }
+.findings li { display: grid; grid-template-columns: 2.2em 1fr; gap: 8px; }
+.findings li::before { counter-increment: f; content: counter(f); font-family: var(--font-display); font-size: 22px; color: var(--accent); line-height: 1.4; }
+.note { font-size: 13px; color: var(--muted); }
+.table-wrap { overflow-x: auto; border-top: 1px solid var(--rule); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; white-space: nowrap; }
+td.n, th.n { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font-size: 12px; padding: 0 7px; border-radius: 3px; border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
+.chip b { font-family: var(--font-data); font-weight: 600; color: var(--fg); margin-left: 3px; }
+.bad { color: var(--hook); font-weight: 700; }
+.chart { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--font-data); font-size: 11px; fill: var(--muted); }
+.chart .axis-title { fill: var(--fg); font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 14px; height: 14px; }
+.tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 6px 9px; border-radius: 4px; max-width: 260px; z-index: 2; }
+.tip .num { color: inherit; }
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card.pick { border-color: var(--accent); }
+.card h3 { font-size: 16px; }
+.card .who { font-size: 12px; color: var(--muted); }
+.metrics { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; font-size: 12px; color: var(--muted); }
+.metrics dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; color: var(--fg); }
+.bar-meter { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.bar-meter i { display: block; height: 100%; background: var(--accent); }
+button.play { font: inherit; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; justify-self: start; }
+button.play:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+button.play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.play[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+.score { font-family: var(--font-data); font-size: 11.5px; line-height: 1.6; color: var(--muted); overflow-x: auto; white-space: pre; padding: 8px 0 0; border-top: 1px dashed var(--rule); }
+.score .gen { color: var(--fg); }
+.grid3 { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+.grid3 .axis { font-size: 12px; color: var(--muted); display: flex; align-items: center; justify-content: center; text-align: center; }
+.grid3 .ylab { writing-mode: vertical-rl; }
+.grid3 .empty { border: 1px dashed var(--rule); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 12px; min-height: 80px; }
+.peaks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.peak { border-left: 3px solid var(--hook); padding: 2px 0 2px 10px; font-size: 13px; }
+.peak .num { color: var(--fg); }
+.method { display: grid; gap: 8px; padding-left: 1.2em; margin: 0; }
+code { font-family: var(--font-data); font-size: 0.92em; }
+@media (max-width: 720px) {
+  .grid3 { grid-template-columns: 1fr; }
+  .grid3 .axis, .grid3 .empty { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <header class="col stack">
+    <div class="eyebrow">niigaki / 作曲ループの採点実験 / 緑眼のジェラシーほか 15 曲</div>
+    <h1>引っかかり計測</h1>
+    <p class="lede">平均点の高い曲だけを残すと、引っかかりのある曲が消えます。それを避けるために、三つの方法を niigaki の曲データで試しました。事故と狙った逸脱を分ける。意外さを別の軸で測る。一番だけでなく、性格の違う候補を残す。</p>
+  </header>
+
+  <section class="col">
+    <h2>わかったこと</h2>
+    <ol class="findings" id="findings"></ol>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">1 / 事故と逸脱を分ける</div>
+      <h2>減点するのは事故だけ</h2>
+      <p>事故は「和音の音の半音上でぶつかり、隣の音へ解決しないまま伸びる、またはフレーズが終わる音」と「メロディが途切れた小節」です。逸脱は減点せず、数えるだけにします。逸脱には、経過音、次の和音の先取り、調の外から半音で寄る音、オクターブ以上の跳躍、シンコペーション、転調があります。</p>
+    </div>
+    <div class="table-wrap"><table id="rules"></table></div>
+    <p class="note col" id="rules-note"></p>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">2 / 意外さを測る</div>
+      <h2>予想通りと雑音のあいだ</h2>
+      <p>Anticipatory Music Transformer に和音とメロディを順に読ませ、メロディの各音について「この音が来る確率」を出します。その対数（ビット）を意外さとします。音高は「メロディがこの瞬間に鳴る」と分かった上でどの高さか。リズムは、いつ鳴り、どれだけ伸びるかです。同じ和音の上に、和音をなぞるだけのメロディと乱数のメロディを置いて、両端の目安にしました。</p>
+    </div>
+    <div class="chart">
+      <div class="legend" id="legend-pieces"></div>
+      <svg id="scatter-pieces" viewBox="0 0 960 420" role="img" aria-label="曲ごとの音高とリズムの意外さ"></svg>
+    </div>
+    <div class="col stack">
+      <h3 id="timeline-title">一音ごとの意外さ</h3>
+      <p id="timeline-lede"></p>
+    </div>
+    <div class="chart">
+      <svg id="timeline" viewBox="0 0 960 240" role="img" aria-label="一音ごとの音高の意外さ"></svg>
+    </div>
+    <div class="peaks" id="peaks"></div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">3 / 一番だけを残さない</div>
+      <h2 id="explore-title">ドロップの 6 小節を 120 通り書かせる</h2>
+      <p id="explore-lede"></p>
+    </div>
+    <div class="chart">
+      <div class="legend" id="legend-cands"></div>
+      <svg id="scatter-cands" viewBox="0 0 960 440" role="img" aria-label="候補の音高とリズムの意外さ"></svg>
+    </div>
+    <div class="col stack">
+      <h3>聴き比べ：一つだけ選ぶとどうなるか</h3>
+      <p>どれも 13〜20 小節目の 8 小節です。頭の 2 小節は原曲のままで、15 小節目から先が入れ替わります。音は確認用の簡易シンセで、サイトの音色ではありません。</p>
+    </div>
+    <div class="compare" id="compare"></div>
+    <div class="col stack">
+      <h3>残した候補：性格ごとの一番</h3>
+      <p>事故のない候補を、音高の意外さとリズムの意外さでそれぞれ三つに分けました。九つのマスごとに、まとまりが一番高いものを残しています。まとまりは、強拍で和音の音を鳴らしている割合、フレーズの終わりが和音の音に着地する割合、動機の繰り返しの平均です。人が聴いて選ぶのは、ここからです。</p>
+    </div>
+    <div class="grid3" id="grid3"></div>
+  </section>
+
+  <section class="col">
+    <div class="eyebrow">方法と限界</div>
+    <ul class="method">
+      <li>モデルは <code id="model-name"></code>（Lakh MIDI で学習、3.6 億パラメータ）。Apple Silicon の GPU で、1 曲の測定に 1〜3 秒、候補 1 本の生成に数秒かかります。</li>
+      <li>楽器は、メロディを矩形波リード、和音をピアノ、ベースを和音の根音として渡しています。音色やドラムは見ていません。</li>
+      <li>意外さは、Lakh MIDI（主に欧米のポップス）にとっての意外さです。東方の原曲らしさや、チップチューンの定番とは一致しません。</li>
+      <li>候補は、伴奏をすべて「先に分かっている条件」として渡し、モデルにはメロディだけを書かせました。生成した音は 16 分音符に丸め、同時に鳴る音は一番高いものだけを残しています。</li>
+      <li>事故の判定はルールなので、意図した不協和も事故に数えることがあります。既存 15 曲での誤検出は 1 件です（アンダートウ 24 小節目）。</li>
+      <li>コードは <code>lab/scoring/</code> にあります。<code>uv run python run.py</code> で測定し、<code>report.py</code> でこのページを作ります。</li>
+    </ul>
+  </section>
+</main>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = /*DATA*/null;
+const KIND = { chip: "チップ", future: "Future Bass", lofi: "Lo-Fi", dnb: "DnB", piano: "ピアノ" };
+const TAG = { passing: "経過音", tension: "半音の緊張を解決", anticipation: "先取り", chromatic: "半音で寄る", outside: "調の外", leap: "跳躍", syncopation: "シンコペーション", modulation: "転調" };
+const ANCHOR = { cliche: "和音をなぞるだけ", noise: "乱数のメロディ" };
+const SECTIONS = { "green-eyed": [[1, "イントロ"], [9, "ビルド"], [13, "ドロップ"], [29, "ブレイク"], [37, "再ビルド"], [45, "ドロップ 2"], [61, "ドロップ 3"]] };
+const f2 = (x) => x.toFixed(2);
+const el = (tag, attrs = {}, text) => {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+};
+const h = (tag, attrs = {}, html) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (html != null) e.innerHTML = html;
+  return e;
+};
+const tip = document.getElementById("tip");
+function showTip(evt, html) {
+  const box = evt.currentTarget.closest(".chart");
+  const r = box.getBoundingClientRect();
+  tip.innerHTML = html;
+  tip.hidden = false;
+  box.appendChild(tip);
+  const x = Math.min(evt.clientX - r.left + 12, r.width - tip.offsetWidth - 8);
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top = (evt.clientY - r.top + 14) + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+function marker(shape, x, y, size, cls) {
+  const s = size;
+  if (shape === "diamond") return el("path", { d: `M${x} ${y - s}L${x + s} ${y}L${x} ${y + s}L${x - s} ${y}Z`, style: cls });
+  if (shape === "square") return el("rect", { x: x - s * 0.8, y: y - s * 0.8, width: s * 1.6, height: s * 1.6, rx: 2, style: cls });
+  if (shape === "cross") return el("path", { d: `M${x - s * 0.6} ${y - s * 0.6}L${x + s * 0.6} ${y + s * 0.6}M${x + s * 0.6} ${y - s * 0.6}L${x - s * 0.6} ${y + s * 0.6}`, style: cls });
+  return el("circle", { cx: x, cy: y, r: s * 0.8, style: cls });
+}
+function legend(id, items) {
+  const box = document.getElementById(id);
+  for (const it of items) {
+    const sv = el("svg", { viewBox: "-8 -8 16 16" });
+    sv.appendChild(marker(it.shape, 0, 0, 6, it.style));
+    const s = h("span");
+    s.appendChild(sv);
+    s.appendChild(document.createTextNode(it.label));
+    box.appendChild(s);
+  }
+}
+
+function scatter(svg, { points, xDomain, yDomain, xTitle, yTitle, vlines = [], hlines = [] }) {
+  const W = 960, H = +svg.getAttribute("viewBox").split(" ")[3];
+  const m = { l: 56, r: 16, t: 12, b: 48 };
+  const X = (v) => m.l + (v - xDomain[0]) / (xDomain[1] - xDomain[0]) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - (v - yDomain[0]) / (yDomain[1] - yDomain[0]) * (H - m.t - m.b);
+  const ticks = (d) => { const out = []; const step = (d[1] - d[0]) > 3 ? 1 : 0.5; for (let v = Math.ceil(d[0] / step) * step; v <= d[1] + 1e-9; v += step) out.push(+v.toFixed(2)); return out; };
+  for (const v of ticks(xDomain)) {
+    svg.appendChild(el("line", { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b, style: "stroke:var(--rule);stroke-width:1" }));
+    svg.appendChild(el("text", { x: X(v), y: H - m.b + 16, "text-anchor": "middle" }, v));
+  }
+  for (const v of ticks(yDomain)) {
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), style: "stroke:var(--rule);stroke-width:1" }));
+    svg.appendChild(el("text", { x: m.l - 8, y: Y(v) + 4, "text-anchor": "end" }, v));
+  }
+  for (const v of vlines) svg.appendChild(el("line", { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b, style: "stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 4" }));
+  for (const v of hlines) svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), style: "stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 4" }));
+  svg.appendChild(el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, xTitle));
+  svg.appendChild(el("text", { x: 14, y: (m.t + H - m.b) / 2, "text-anchor": "middle", class: "axis-title", transform: `rotate(-90 14 ${(m.t + H - m.b) / 2})` }, yTitle));
+  for (const p of points) {
+    const g = el("g", { tabindex: 0, style: "cursor:default;outline:none" });
+    g.appendChild(el("circle", { cx: X(p.x), cy: Y(p.y), r: 12, style: "fill:transparent" }));
+    g.appendChild(marker(p.shape, X(p.x), Y(p.y), p.size ?? 6, p.style));
+    if (p.label) g.appendChild(el("text", { x: X(p.x) + 9, y: Y(p.y) - 8, style: "fill:var(--fg)" }, p.label));
+    g.addEventListener("mousemove", (e) => showTip(e, p.tip));
+    g.addEventListener("mouseleave", hideTip);
+    g.addEventListener("focus", (e) => { const r = e.currentTarget.getBoundingClientRect(); showTip({ currentTarget: e.currentTarget, clientX: r.left + r.width / 2, clientY: r.top }, p.tip); });
+    g.addEventListener("blur", hideTip);
+    svg.appendChild(g);
+  }
+  return { X, Y };
+}
+
+const pieces = DATA.pieces, anchors = DATA.anchors, ex = DATA.explore;
+document.getElementById("model-name").textContent = DATA.model;
+
+// 1. rules table
+{
+  const t = document.getElementById("rules");
+  t.innerHTML = `<thead><tr><th>曲</th><th>種類</th><th>調</th><th class="n">音数</th><th class="n">事故</th><th>逸脱（減点しない）</th></tr></thead>`;
+  const body = h("tbody");
+  for (const p of [...pieces].sort((a, b) => b.notes - a.notes)) {
+    const tr = h("tr");
+    const chips = Object.entries(p.deviations).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<span class="chip">${TAG[k]}<b>${v}</b></span>`).join("");
+    const acc = p.accidents.length ? `<span class="bad">${p.accidents.length}</span>` : "0";
+    tr.innerHTML = `<td>${p.title}</td><td>${KIND[p.kind]}</td><td class="num">${p.key}</td><td class="n">${p.notes}</td><td class="n">${acc}</td><td><div class="chips">${chips}</div></td>`;
+    body.appendChild(tr);
+  }
+  const noise = anchors.filter((a) => a.label === "noise");
+  const tr = h("tr");
+  tr.innerHTML = `<td>乱数のメロディ（${noise.length} 曲の和音の上）</td><td>対照</td><td></td><td></td><td class="n"><span class="bad">${Math.min(...noise.map((a) => a.accidents))}〜${Math.max(...noise.map((a) => a.accidents))}</span></td><td class="note">和音をなぞるだけのメロディは事故 0</td>`;
+  body.appendChild(tr);
+  t.appendChild(body);
+  const flagged = pieces.flatMap((p) => p.accidents.map((a) => `${p.title} ${a.bar} 小節 ${a.beat} 拍目`));
+  document.getElementById("rules-note").textContent = flagged.length
+    ? `既存曲で事故と判定したのは ${flagged.join("、")} です。ホ短調の和音の上で F を鳴らしてフレーズを閉じる箇所で、意図した響きかもしれません。`
+    : "既存曲に事故はありませんでした。";
+}
+
+// 2. scatter of pieces and anchors
+{
+  const pts = [
+    ...pieces.map((p) => ({ x: p.pitch, y: p.rhythm, shape: "circle", style: "fill:var(--s1);stroke:var(--panel);stroke-width:2", label: p.title.length <= 8 ? p.title : "", tip: `<b>${p.title}</b><br>音高 <span class="num">${f2(p.pitch)}</span> ／ リズム <span class="num">${f2(p.rhythm)}</span> ビット<br>動機の繰り返し <span class="num">${Math.round(p.repetition * 100)}%</span>` })),
+    ...anchors.map((a) => ({ x: a.pitch, y: a.rhythm, shape: a.label === "cliche" ? "square" : "diamond", style: `fill:var(--${a.label === "cliche" ? "s2" : "s3"});stroke:var(--panel);stroke-width:2`, tip: `<b>${ANCHOR[a.label]}</b>（${pieces.find((p) => p.slug === a.slug).title} の和音）<br>音高 <span class="num">${f2(a.pitch)}</span> ／ リズム <span class="num">${f2(a.rhythm)}</span> ビット<br>事故 <span class="num">${a.accidents}</span>` })),
+  ];
+  legend("legend-pieces", [
+    { shape: "circle", style: "fill:var(--s1)", label: "niigaki の曲" },
+    { shape: "square", style: "fill:var(--s2)", label: "和音をなぞるだけ" },
+    { shape: "diamond", style: "fill:var(--s3)", label: "乱数のメロディ" },
+  ]);
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  scatter(document.getElementById("scatter-pieces"), { points: pts, xDomain: [0, Math.ceil(Math.max(...xs))], yDomain: [0, Math.ceil(Math.max(...ys) * 2) / 2], xTitle: "音高の意外さ（ビット／音）→ 予想しにくい", yTitle: "リズムの意外さ（ビット／音）" });
+}
+
+// 2b. timeline
+{
+  const tl = DATA.timeline;
+  const notes = tl.notes;
+  const sorted = [...notes].sort((a, b) => b.pitch - a.pitch);
+  const cut = sorted[Math.floor(notes.length * 0.1)].pitch;
+  const top = notes.filter((n) => n.pitch >= cut);
+  const share = (ns) => ns.filter((n) => n.tags.some((t) => t !== "syncopation")).length / ns.length;
+  document.getElementById("timeline-title").textContent = `一音ごとの意外さ：${tl.title}`;
+  document.getElementById("timeline-lede").textContent = `${notes.length} 音の音高の意外さを並べました。上位 1 割（${f2(cut)} ビット以上）の音のうち、1 のルールで逸脱（経過音・先取り・跳躍など）と判定された音は ${Math.round(share(top) * 100)}% です。全体では ${Math.round(share(notes) * 100)}% です。高い山は、ドロップで崩した箇所に集まっています。`;
+  const svg = document.getElementById("timeline");
+  const W = 960, H = 240, m = { l: 40, r: 8, t: 26, b: 30 };
+  const bars = tl.bars;
+  const barOf = (n) => n.bar - 1 + (n.beat - 1) / 4;
+  const X = (b) => m.l + b / bars * (W - m.l - m.r);
+  const maxY = Math.ceil(sorted[0].pitch);
+  const Y = (v) => H - m.b - v / maxY * (H - m.t - m.b);
+  for (let v = 0; v <= maxY; v += Math.max(1, Math.round(maxY / 4))) {
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), style: "stroke:var(--rule);stroke-width:1" }));
+    svg.appendChild(el("text", { x: m.l - 6, y: Y(v) + 4, "text-anchor": "end" }, v));
+  }
+  for (const [b, name] of SECTIONS[tl.slug] ?? []) {
+    svg.appendChild(el("line", { x1: X(b - 1), x2: X(b - 1), y1: m.t - 14, y2: H - m.b, style: "stroke:var(--faint);stroke-width:1" }));
+    svg.appendChild(el("text", { x: X(b - 1) + 4, y: m.t - 4, style: "fill:var(--fg)" }, name));
+  }
+  for (let b = 0; b <= bars; b += 8) svg.appendChild(el("text", { x: X(b), y: H - m.b + 16, "text-anchor": "middle" }, b + 1));
+  svg.appendChild(el("text", { x: W - m.r, y: H - 4, "text-anchor": "end" }, "小節"));
+  const w = Math.max(1.5, (W - m.l - m.r) / notes.length * 0.7);
+  for (const n of notes) {
+    const hot = n.pitch >= cut;
+    const g = el("g");
+    g.appendChild(el("rect", { x: X(barOf(n)) - w / 2, y: Y(n.pitch), width: w, height: Math.max(0.5, Y(0) - Y(n.pitch)), style: `fill:var(--${hot ? "hook" : "dot"})` }));
+    g.appendChild(el("rect", { x: X(barOf(n)) - 4, y: m.t, width: 8, height: H - m.t - m.b, style: "fill:transparent" }));
+    g.addEventListener("mousemove", (e) => showTip(e, `<b>${n.bar} 小節 ${n.beat} 拍目 ${n.note}</b><br>音高 <span class="num">${f2(n.pitch)}</span> ／ リズム <span class="num">${f2(n.rhythm)}</span> ビット${n.tags.length ? "<br>" + n.tags.map((t) => TAG[t]).join("・") : ""}`));
+    g.addEventListener("mouseleave", hideTip);
+    svg.appendChild(g);
+  }
+  const box = document.getElementById("peaks");
+  for (const n of sorted.slice(0, 8)) {
+    box.appendChild(h("div", { class: "peak" }, `<span class="num">${n.bar}.${n.beat}</span> ${n.note} <span class="num">${f2(n.pitch)}</span> ビット<br><span class="note">${n.tags.length ? n.tags.map((t) => TAG[t]).join("・") : "ルール上は普通の音"}</span>`));
+  }
+}
+
+// 3. candidates
+const byId = Object.fromEntries(ex.candidates.map((c) => [c.id, c]));
+const gens = ex.candidates.filter((c) => "seed" in c);
+const passed = gens.filter((c) => c.accidents === 0);
+const eliteIds = new Set(Object.values(ex.elites));
+{
+  const rejected = gens.length - passed.length;
+  const reasons = {};
+  gens.forEach((c) => c.reasons.forEach((r) => (reasons[r] = (reasons[r] || 0) + 1)));
+  document.getElementById("explore-title").textContent = `${ex.title}のドロップを ${gens.length} 通り書かせる`;
+  document.getElementById("explore-lede").textContent = `${ex.title}の ${ex.bars[0]}〜${ex.bars[1]} 小節目（最初のドロップの前半）を題材にしました。ビルド 4 小節と、ドロップ頭の 2 小節（${ex.kept_bars[0]}〜${ex.kept_bars[1]} 小節目）は原曲のまま渡し、残り 6 小節のメロディをモデルに書かせています。和音とベースは原曲のままです。${gens.length} 本のうち ${rejected} 本が事故で落ちました（${Object.entries(reasons).map(([k, v]) => `${k} ${v} 本`).join("、")}）。`;
+
+  const pts = [
+    ...gens.filter((c) => c.accidents > 0).map((c) => ({ c, shape: "cross", size: 5, style: "fill:none;stroke:var(--faint);stroke-width:1.5" })),
+    ...passed.filter((c) => !eliteIds.has(c.id)).map((c) => ({ c, shape: "circle", size: 5, style: "fill:var(--dot);stroke:var(--panel);stroke-width:1.5" })),
+    ...passed.filter((c) => eliteIds.has(c.id)).map((c) => ({ c, shape: "circle", size: 8, style: "fill:var(--s1);stroke:var(--panel);stroke-width:2" })),
+    { c: byId.original, shape: "diamond", size: 9, style: "fill:var(--s2);stroke:var(--panel);stroke-width:2", label: "原曲" },
+    { c: byId[ex.likely], shape: "square", size: 8, style: "fill:var(--s3);stroke:var(--panel);stroke-width:2", label: "平均的な採点の 1 位" },
+  ].map((p) => ({ ...p, x: p.c.pitch, y: p.c.rhythm, tip: `<b>${p.label ?? (p.c.accidents ? "事故で落とした候補" : eliteIds.has(p.c.id) ? "残した候補" : "事故のない候補")}</b> <span class="num">${p.c.id}</span><br>音高 <span class="num">${f2(p.c.pitch)}</span> ／ リズム <span class="num">${f2(p.c.rhythm)}</span> ビット<br>まとまり <span class="num">${Math.round(p.c.quality * 100)}</span>${p.c.reasons.length ? "<br>" + p.c.reasons.join("、") : ""}` }));
+  legend("legend-cands", [
+    { shape: "circle", style: "fill:var(--s1)", label: "残した候補（マスごとの一番）" },
+    { shape: "circle", style: "fill:var(--dot)", label: "事故のない候補" },
+    { shape: "cross", style: "fill:none;stroke:var(--faint);stroke-width:1.5", label: "事故で落とした候補" },
+    { shape: "diamond", style: "fill:var(--s2)", label: "原曲" },
+    { shape: "square", style: "fill:var(--s3)", label: "平均的な採点の 1 位" },
+  ]);
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  scatter(document.getElementById("scatter-cands"), {
+    points: pts,
+    xDomain: [0, Math.ceil(Math.max(...xs))],
+    yDomain: [0, Math.ceil(Math.max(...ys) * 2) / 2],
+    xTitle: "音高の意外さ（ビット／音）→ 予想しにくい",
+    yTitle: "リズムの意外さ（ビット／音）",
+    vlines: ex.x_edges,
+    hlines: ex.y_edges,
+  });
+}
+
+let playing = null;
+function playButton(id) {
+  const b = h("button", { class: "play", type: "button", "aria-pressed": "false" }, "▶ 再生");
+  b.addEventListener("click", () => {
+    if (playing && playing.id === id) { playing.audio.pause(); playing.btn.setAttribute("aria-pressed", "false"); playing.btn.textContent = "▶ 再生"; playing = null; return; }
+    if (playing) { playing.audio.pause(); playing.btn.setAttribute("aria-pressed", "false"); playing.btn.textContent = "▶ 再生"; }
+    const audio = new Audio(DATA.audioData[id]);
+    audio.play().catch(() => {});
+    b.setAttribute("aria-pressed", "true");
+    b.textContent = "■ 停止";
+    audio.addEventListener("ended", () => { b.setAttribute("aria-pressed", "false"); b.textContent = "▶ 再生"; playing = null; });
+    playing = { id, audio, btn: b };
+  });
+  return b;
+}
+function scoreText(c) {
+  const first = ex.bars[0];
+  const keep = ex.kept_bars[1] - first + 1;
+  return c.m.map((line, i) => `<span class="${i >= keep ? "gen" : ""}">${String(first + i).padStart(2, " ")}| ${line}</span>`).join("\n");
+}
+function card(c, title, who, pick) {
+  const d = h("div", { class: "card" + (pick ? " pick" : "") });
+  d.appendChild(h("h3", {}, title));
+  if (who) d.appendChild(h("div", { class: "who" }, who));
+  d.appendChild(playButton(c.id));
+  d.appendChild(h("dl", { class: "metrics" }, `<dt>音高の意外さ</dt><dd>${f2(c.pitch)} ビット</dd><dt>リズムの意外さ</dt><dd>${f2(c.rhythm)} ビット</dd><dt>まとまり</dt><dd>${Math.round(c.quality * 100)}</dd><dt>事故</dt><dd>${c.accidents ? c.reasons.join("、") : "なし"}</dd>`));
+  d.appendChild(h("div", { class: "score" }, scoreText(c)));
+  return d;
+}
+{
+  const box = document.getElementById("compare");
+  box.appendChild(card(byId.original, "原曲", "ZUN の旋律を刻み直したもの"));
+  box.appendChild(card(byId[ex.likely], "平均的な採点の 1 位", "モデルにとって一番ありそうな候補（意外さの合計が最小）"));
+  box.appendChild(card(byId[ex.best], "まとまりの 1 位", "事故のない候補の中で、まとまりが最大"));
+  box.appendChild(card(byId.cliche, "和音をなぞるだけ", "対照：予想通りすぎる端"));
+  box.appendChild(card(byId.noise, "乱数のメロディ", "対照：雑音の端"));
+}
+{
+  const g = document.getElementById("grid3");
+  const L = ["素直", "中間", "冒険"];
+  g.appendChild(h("div", { class: "axis" }, ""));
+  for (let x = 0; x < 3; x++) g.appendChild(h("div", { class: "axis" }, `音高：${L[x]}`));
+  for (let y = 2; y >= 0; y--) {
+    g.appendChild(h("div", { class: "axis ylab" }, `リズム：${L[y]}`));
+    for (let x = 0; x < 3; x++) {
+      const id = ex.elites[`${x},${y}`];
+      if (id) g.appendChild(card(byId[id], `音高 ${L[x]} × リズム ${L[y]}`, `候補 ${id}（${byId[id].source}）`, false));
+      else g.appendChild(h("div", { class: "empty" }, "該当なし"));
+    }
+  }
+}
+
+// findings
+{
+  const ps = pieces.map((p) => p.pitch);
+  const cl = anchors.filter((a) => a.label === "cliche").map((a) => a.pitch);
+  const no = anchors.filter((a) => a.label === "noise").map((a) => a.pitch);
+  const noiseAcc = anchors.filter((a) => a.label === "noise").map((a) => a.accidents);
+  const likely = byId[ex.likely], orig = byId.original;
+  const items = [
+    `事故の判定は、乱数のメロディを 1 曲あたり ${Math.min(...noiseAcc)}〜${Math.max(...noiseAcc)} 件で落としました。既存 15 曲で事故と判定したのは ${pieces.reduce((s, p) => s + p.accidents.length, 0)} 件だけです。転調や跳躍、先取りは減点せず、逸脱として数えています。`,
+    `音高の意外さは、和音をなぞるだけのメロディが ${f2(Math.min(...cl))}〜${f2(Math.max(...cl))} ビット、niigaki の曲が ${f2(Math.min(...ps))}〜${f2(Math.max(...ps))} ビット、乱数が ${f2(Math.min(...no))}〜${f2(Math.max(...no))} ビットでした。曲はその間に収まっています。「ほどよく裏切る」範囲の目安に使えます。`,
+    `モデルにとって一番ありそうな候補（音高 ${f2(likely.pitch)} ビット）は、直前のフレーズの音型を繰り返していました。原曲（${f2(orig.pitch)} ビット）は、事故のない ${passed.length} 本のうち ${passed.filter((c) => c.pitch < orig.pitch).length} 本より予想しにくい側にいます。一つだけ選ぶと原曲のような案は残りませんが、九つのマスに分けて残せば消えずに残ります。`,
+    `まとまりの指標も、和音をなぞるだけのメロディに ${Math.round(byId.cliche.quality * 100)} 点を付けました。生成した候補の最高点（${Math.round(byId[ex.best].quality * 100)}）に${byId.cliche.quality > byId[ex.best].quality + 0.005 ? "勝つ" : "並ぶ"}値です。そのまとまり 1 位の候補も、1 小節の音型を 4 回繰り返すだけのメロディでした。完成度の指標は全体の順位付けには使わず、同じマスの中で比べるときだけ使います。`,
+  ];
+  const ol = document.getElementById("findings");
+  for (const t of items) ol.appendChild(h("li", {}, `<span>${t}</span>`));
+}
+</script>
