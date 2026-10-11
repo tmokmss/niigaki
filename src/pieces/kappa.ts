@@ -210,6 +210,7 @@ export const kappa: ChipPiece = {
   bpm: 170,
   groove: "four",
   bassline: "octave",
+  timbre: "bright",
   visual: "danmaku",
   bars,
 };

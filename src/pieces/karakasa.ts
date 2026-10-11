@@ -143,6 +143,7 @@ export const karakasa: ChipPiece = {
   bpm: 160,
   groove: "four",
   bassline: "octave",
+  timbre: "pluck",
   visual: "danmaku",
   bars,
 };

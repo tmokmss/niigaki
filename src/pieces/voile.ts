@@ -177,6 +177,7 @@ export const voile: ChipPiece = {
   bpm: 160,
   groove: "four",
   bassline: "octave",
+  timbre: "flute",
   visual: "danmaku",
   bars,
 };
