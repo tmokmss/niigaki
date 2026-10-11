@@ -1,6 +1,6 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
@@ -124,10 +124,21 @@ Liquid DnB を頼まれたら `kind: "dnb"`（`src/lib/dnb.ts`）で書く。例
 - ノイズの汚し（歪み・レコードのノイズ・ノイズのライザー）は入れない
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。サブが一番大きくなりやすい。ドロップでベースの RMS が 0.1、ドラム 0.08、リード 0.05 前後、全体のピークが 0.8 未満なら割れない
 
+## 5e. Melodic Dubstep で組み直す
+
+Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubstep"`（`src/lib/dubstep.ts`）で書く。例は `src/pieces/septette.ts`。5 章の構成の考え方を守る。
+
+- BPM 140〜150 のハーフタイム（キック 1 拍目と 3 拍目の裏、スネア 3 拍目）。4 拍子の原曲は 1 小節をそのまま 1 小節にする
+- 構成：イントロ 8（主題をピアノとパッドだけで。後半 4 小節に `hat`）→ ビルド 8（前半 4 は主題の頭の音型を詰めて `beat`、後半 4 は `rise`：`riser`・`saw`・`roll: 4 → 8 → 16 → 32`、最後の小節に `gap`）→ ドロップ 16 → ブレイク 8（原曲の別の旋律、ドラムとベースを抜き `open: 0.3`）→ 再ビルド 8 → ドロップ 2 16（属和音で終え、イントロの主題の弱起で戻る）
+- スーパーソーのパッドとピアノの和音は毎小節鳴る。区間ごとに変えるのは `open`（イントロ 0.1 台、ブレイク 0.3、ドロップ 1）。和音は add9・sus2・maj9 を足して 4〜5 音、根音を先頭に A3〜G4
+- リードはピアノ。`saw`（0〜1）でスーパーソーのリードを重ねる。ビルドの途中から 0.2 → 0.9 と少しずつ上げ、ドロップで 1 にして、ピアノから打ち込みへ段階的に移す（一度に入れると急に打ち込みに変わって聞こえる）
+- `wobble` はサイン波のサブと、1 オクターブ上の FM・矩形波をローパスで開閉するベース。値は 1 小節に開く回数で、ドロップは 4 と 8 を交互にし、4 小節目を 12（3 連）にすると重さと動きが両立する。歪みは入れない
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。ベースが一番大きくなりやすい。ドロップでリードの RMS 0.09、ベース 0.06、和音 0.05 前後、全体のピークが 0.85 前後なら割れず、ベースが旋律を覆わない
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
 - ブラウザのログ（`.playwright-cli/`）を消してからコミットし、push して main への PR を作る
 

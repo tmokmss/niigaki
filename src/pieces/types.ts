@@ -135,4 +135,35 @@ export type DnbPiece = {
   bars: DnbBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece;
+// c: chord with its add9/7th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
+// the supersaw pad and the piano always hold the chord; open: pad low-pass 0-1, reached by the end of the bar
+// saw: a supersaw lead doubles the piano melody; wobble: wobble bass over a sine sub, its low-pass opening this many times a bar
+// beat: half-time drums with the snare on beat 3; hat: the hats alone; riser: a rising synth sweep across consecutive bars; gap: beat 4 falls silent
+export type DubstepBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  open?: number;
+  // supersaw lead over the piano, 0-1
+  saw?: number;
+  wobble?: 4 | 8 | 12;
+  beat?: boolean;
+  hat?: boolean;
+  roll?: 4 | 8 | 16 | 32;
+  riser?: boolean;
+  gap?: boolean;
+  crash?: boolean;
+};
+
+export type DubstepPiece = {
+  kind: "dubstep";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: DubstepBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece;
