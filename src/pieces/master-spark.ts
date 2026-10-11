@@ -2,7 +2,7 @@
 // The F-sharp-minor chorus is left out: the verses in F minor step up a whole tone into the G-minor chorus.
 import type { BossaBar, BossaPiece } from "./types";
 
-// the thumb plays the first note; the fingers the rest, kept below the flute
+// the thumb plays the first note; the fingers the rest
 
 const Fm9 = ["F2", "Ab3", "Eb4", "G4", "C5"];
 const Fm11 = ["F2", "Ab3", "Eb4", "Bb4", "C5"];
@@ -131,14 +131,13 @@ export const masterSpark: BossaPiece = {
   // star gold, the forest's yellow-green, love pink, the spark's vermilion
   hues: [48, 100, 325, 18],
   bars: [
-    ...section(INTRO, { guitar: "arp" }),
+    ...section(INTRO),
     ...section(VERSE, full),
-    ...section(BRIDGE, { ...full, guitar: "arp" }),
+    ...section(BRIDGE, full),
     ...section([...CHORUS, ...APPROACH], full),
-    ...section(INTERLUDE, { bass: true, guitar: "arp" }),
-    ...section(LOW, { ...full, guitar: "arp" }),
-    ...section(TRESILLO, { beat: true, bass: true, guitar: "strum" }),
-    ...section(OUTRO.slice(0, 2), { ...full, guitar: "strum" }),
-    ...section(OUTRO.slice(2), { bass: true, guitar: "arp" }),
+    ...section(INTERLUDE, { bass: true }),
+    ...section([...LOW, ...TRESILLO], full),
+    ...section(OUTRO.slice(0, 2), full),
+    ...section(OUTRO.slice(2), { bass: true }),
   ],
 };

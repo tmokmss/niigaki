@@ -1,22 +1,10 @@
 import * as Tone from "tone";
 import type { BossaPiece } from "../pieces/types";
-import { collector, transpose, type Kit, type NoteEvent } from "./score";
+import { collector, midi, transpose, type Kit, type NoteEvent } from "./score";
 
-// two-bar patterns in sixteenth steps (a 4/4 bar here holds two 2/4 bars of the usual notation):
-// the fingers pinch the chord "x.x..x.x | .x..x.x." in eighths, and the cross-stick plays the bossa clave
-const FINGERS = [
-  [0, 4, 10, 14],
-  [2, 8, 12],
-];
-// fingerpicking: [step, which finger note counting up from the lowest], the thumb taking 1 and 3
-const ARP = [
-  [2, 0],
-  [4, 1],
-  [6, 2],
-  [10, 1],
-  [12, 2],
-  [14, 3],
-];
+// in sixteenth steps (a 4/4 bar here holds two 2/4 bars of the usual notation), as João Gilberto plays The Girl from Ipanema:
+// every bar the fingers pinch the whole chord on 1, 2 and the and of 3, and let it ring; the cross-stick plays the two-bar bossa clave
+const FINGERS = [0, 4, 10];
 const CLAVE = [
   [0, 6, 12],
   [4, 10],
@@ -38,28 +26,15 @@ export function renderBossa(piece: BossaPiece) {
     const thumb = (step: number) => (step === 0 ? bar.c[0] : bar.c2 ? bar.c2[0] : transpose(bar.c[0], -5));
     const next = piece.bars[(i + 1) % piece.bars.length];
 
-    const fingers = (step: number) => at(step).slice(1);
-    if (bar.guitar === "arp") {
-      // one string at a time between the thumb's notes, up and back down, each left ringing to the half bar
-      for (const [s, k] of ARP) {
-        const f = fingers(s);
-        add(t + s * six, "guitar", f[Math.min(k, f.length - 1)], (8 - (s % 8)) * six, 0.5 + rand() * 0.1);
-      }
-    } else if (bar.guitar === "strum") {
-      // the fingers brush down on each eighth and back up on the offbeats, accented on the bossa pattern
-      for (let s = 0; s < 16; s += 2) {
-        const f = fingers(s);
-        const accent = FINGERS[i % 2].includes(s);
-        add(t + s * six, "strum", s % 4 ? [...f].reverse() : f, 2 * six, accent ? 0.7 : 0.35);
-      }
-    } else {
-      const hits = FINGERS[i % 2];
-      hits.forEach((s, k) => {
-        // each chord rings until the fingers strike again; off the beat only the top two strings
-        const until = hits[k + 1] ?? 16 + FINGERS[(i + 1) % 2][0];
-        add(t + s * six + rand() * 0.008, "guitar", s % 4 ? fingers(s).slice(-2) : fingers(s), (until - s) * six, s % 4 ? 0.55 : 0.75);
-      });
-    }
+    // the fingers take every string above the thumb: the chord's fifth over the root, then the voicing
+    const chord = (step: number) => {
+      const c = at(step);
+      return [transpose(c[0], 7), ...c.slice(1)].sort((x, y) => midi(x) - midi(y));
+    };
+    FINGERS.forEach((s, k) => {
+      const until = FINGERS[k + 1] ?? 16;
+      add(t + s * six + rand() * 0.008, "guitar", chord(s), (until - s) * six, s ? 0.6 : 0.7);
+    });
     for (const s of [0, 8]) add(t + s * six, "thumb", thumb(s), 8 * six, 0.7);
     if (bar.bass) {
       // the bass doubles the thumb, each half pushed into the next by an eighth-note pickup
@@ -101,8 +76,8 @@ export function bossaKit(bpm: number): Kit {
   out.chain(new Tone.Limiter(-1), Tone.getDestination());
   const reverb = new Tone.Reverb({ decay: 2.4, wet: 0.3 }).connect(out);
 
-  // nylon-string guitar and flute samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0), in the same room
-  // the recordings open with silence and, for the low flute, up to 0.2 s of breath: each starts where it reaches a tenth of its peak
+  // nylon-string guitar and saxophone samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0), in the same room
+  // the recordings open with silence or breath: each starts where it reaches a tenth of its peak
   const trim = (buf: Tone.ToneAudioBuffer) => {
     const ch = buf.getChannelData(0);
     const peak = ch.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
@@ -116,8 +91,8 @@ export function bossaKit(bpm: number): Kit {
     }
     return s;
   };
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 1, -10);
-  const flute = sampler("flute", ["C4", "E4", "A4", "C5", "E5", "A5", "C6", "E6", "A6", "C7"], 0.4, -10);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 1, -11);
+  const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.3, -11);
 
   const bass = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: "triangle" },
@@ -151,12 +126,11 @@ export function bossaKit(bpm: number): Kit {
       if (e.voice === "guitar") {
         // the fingers pinch the strings together, the lowest a hair early
         e.notes.forEach((n, k) => guitar.triggerAttackRelease(n, e.dur, time + k * 0.006, e.vel));
-      } else if (e.voice === "strum") {
-        e.notes.forEach((n, k) => guitar.triggerAttackRelease(n, e.dur, time + k * 0.018, e.vel));
       } else if (e.voice === "thumb") {
         guitar.triggerAttackRelease(e.notes, e.dur, time, e.vel);
       } else if (e.voice === "lead") {
-        flute.triggerAttackRelease(e.notes, e.dur, time, e.vel);
+        // a tenor saxophone, sounding an octave below the written line
+        sax.triggerAttackRelease(e.notes.map((n) => transpose(n, -12)), e.dur, time, e.vel);
       } else if (e.voice === "bass") {
         bass.triggerAttackRelease(e.notes, e.dur, time, e.vel);
       } else if (e.voice === "kick") {
@@ -170,7 +144,7 @@ export function bossaKit(bpm: number): Kit {
       }
     },
     releaseAll() {
-      flute.releaseAll();
+      sax.releaseAll();
       guitar.releaseAll();
       bass.releaseAll();
     },
