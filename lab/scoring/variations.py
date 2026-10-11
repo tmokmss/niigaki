@@ -68,7 +68,8 @@ def main(slug, first, path):
         s = amt.surprise(model, lead, p["chords"])
         idx = [i for i, n in enumerate(lead) if first <= n["bar"] < first + bars]
         reasons = [a["reason"] for a in check({**p, "lead": lead})["accidents"] if first < a["bar"] <= first + bars]
-        reasons += ["メロディが無い小節"] * sum(1 for b in range(first, first + bars) if not any(n["bar"] == b for n in line))
+        sounding = lambda n, b: n["bar"] * p["beats"] + n["beat"] < (b + 1) * p["beats"] and (n["bar"] - b) * p["beats"] + n["beat"] + n["beats"] > 0
+        reasons += ["メロディが無い小節"] * sum(1 for b in range(first, first + bars) if not any(sounding(n, b) for n in line))
         mean = lambda k: sum(s[i][k] for i in idx) / len(idx) if idx else 0.0
         cands.append(
             {

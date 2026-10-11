@@ -135,10 +135,22 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 - `wobble` はサイン波のサブと、1 オクターブ上の FM・矩形波をローパスで開閉するベース。値は 1 小節に開く回数で、ドロップは 4 と 8 を交互にし、4 小節目を 12（3 連）にすると重さと動きが両立する。歪みは入れない
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。ベースが一番大きくなりやすい。ドロップでリードの RMS 0.09、ベース 0.06、和音 0.05 前後、全体のピークが 0.85 前後なら割れず、ベースが旋律を覆わない
 
+## 5f. ボサノバで組み直す
+
+ボサノバを頼まれたら `kind: "bossa"`（`src/lib/bossa.ts`）で書く。例は `src/pieces/master-spark.ts`。ドロップは作らず、サビの繰り返しを崩していく。
+
+- BPM 125〜140。4 拍子の原曲は 1 小節をそのまま 1 小節にする（`m` は 16 分音符の数）。速い原曲も BPM を落とし、旋律の音価は変えない
+- 構成：イントロ 4（原曲のイントロをギターとリードだけで）→ A メロ・B メロ（`beat`・`bass`）→ サビ → 間奏 4（イントロの音型をサビの調で、ドラムを抜く）→ サビ 2 → アウトロ 4（属和音で終え、頭の和音に解決させる）
+- 原曲が半音ずつ転調するなら、途中の調は飛ばしてよい。前の区間の最後を次の調の属和音（sus4・♭9 を足す）にして全音上げる
+- ガットギターは毎小節、2 小節の型で和音を刻む。和音は 7th・9th・6/9 を足して 4〜5 音、根音を先頭に A3〜G4（m → m9・m6/9、長三和音 → maj9・6/9、属和音 → 7(♭13)・7sus4(♭9)、終わりの V は 7(♭9♭13)）
+- `beat` はシェイカーの 16 分・ボサのクラーベのクロススティック・柔らかいキック、`bass` は根音と 5 度に次の和音への先取り。リードはフルート
+- サビ 2 は、1 オクターブ下で吹いて伸ばしの小節に答えを入れる、3＋3＋2 に割る、半音下から寄せる、8 分前に食う、などの案を `variations.py` で採点して選ぶ
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。リードが大きくなりやすい。サビでリードの RMS 0.06、ギターとベース 0.045、打楽器 0.03 前後、全体の RMS 0.09 前後でピークが 0.7 以下なら、ギターの弦のアタックで割れない
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
 - 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること

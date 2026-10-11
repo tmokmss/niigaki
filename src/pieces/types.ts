@@ -166,4 +166,27 @@ export type DubstepPiece = {
   bars: DubstepBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece;
+// c: chord with its 7th/9th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
+// the nylon guitar always comps the chord in the two-bar bossa pattern
+// beat: shaker, cross-stick on the bossa clave and a soft kick; bass: root and fifth with pickups into the next chord
+export type BossaBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  beat?: boolean;
+  bass?: boolean;
+  crash?: boolean;
+};
+
+export type BossaPiece = {
+  kind: "bossa";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: BossaBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece;

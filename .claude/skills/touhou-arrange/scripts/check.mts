@@ -12,13 +12,14 @@ const { renderFuture } = await load("src/lib/future.ts");
 const { renderLofi } = await load("src/lib/lofi.ts");
 const { renderDnb } = await load("src/lib/dnb.ts");
 const { renderDubstep } = await load("src/lib/dubstep.ts");
+const { renderBossa } = await load("src/lib/bossa.ts");
 const { pieces } = await load("src/pieces/index.ts");
 
 const piece = pieces.find((p: { slug: string }) => p.slug === slug);
-if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb or dubstep piece "${slug}"`);
+if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb, dubstep or bossa piece "${slug}"`);
 
 const beats = piece.beats ?? 4;
-const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep }[piece.kind as string];
+const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep, bossa: renderBossa }[piece.kind as string];
 const r: { events: Event[]; end: number } = render(piece);
 // lofi bars count sixteenth-note triplets
 const steps = piece.kind === "lofi" ? 24 : beats * 4;
