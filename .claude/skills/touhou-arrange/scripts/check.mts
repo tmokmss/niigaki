@@ -9,16 +9,20 @@ const slug = process.argv[2];
 const load = (p: string) => import(pathToFileURL(resolve(process.cwd(), p)).href);
 const { renderChip } = await load("src/lib/chip.ts");
 const { renderFuture } = await load("src/lib/future.ts");
+const { renderLofi } = await load("src/lib/lofi.ts");
 const { pieces } = await load("src/pieces/index.ts");
 
 const piece = pieces.find((p: { slug: string }) => p.slug === slug);
-if (!piece || piece.kind === "piano") throw new Error(`no chip or future piece "${slug}"`);
+if (!piece || piece.kind === "piano") throw new Error(`no chip, future or lofi piece "${slug}"`);
 
 const beats = piece.beats ?? 4;
-const r: { events: Event[]; end: number } = piece.kind === "future" ? renderFuture(piece) : renderChip(piece);
+const render = { chip: renderChip, future: renderFuture, lofi: renderLofi }[piece.kind as string];
+const r: { events: Event[]; end: number } = render(piece);
+// lofi bars count sixteenth-note triplets
+const steps = piece.kind === "lofi" ? 24 : beats * 4;
 const badBars = (piece.bars as Bar[])
   .map((b, i) => [i + 1, (b.m ?? []).reduce((s, [, n]) => s + n, 0)])
-  .filter(([, n]) => n !== 0 && Math.abs(n - beats * 4) > 1e-9);
+  .filter(([, n]) => n !== 0 && Math.abs(n - steps) > 1e-9);
 const seen = new Set<string>();
 const collisions = r.events.filter((e) => {
   if (!["kick", "snare", "hat", "crash"].includes(e.voice)) return false;

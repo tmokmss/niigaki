@@ -80,4 +80,28 @@ export type FuturePiece = {
   bars: FutureBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece;
+// c: chord with its 7th/9th/11th, root A3-G4 first; c2: chord for beats 3-4
+// m: [note, steps] with 24 steps (sixteenth-note triplets) per bar, so the sixteenths of two 3/4 bars fill one bar
+// open: low-pass opening 0-1, reached by the end of the bar
+export type LofiBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  beat?: boolean;
+  bass?: boolean;
+  open?: number;
+  crash?: boolean;
+};
+
+export type LofiPiece = {
+  kind: "lofi";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: LofiBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece;
