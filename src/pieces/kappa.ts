@@ -3,6 +3,7 @@ import { transpose } from "../lib/score";
 import type { ChipBar, ChipPiece } from "./types";
 
 const Bb = ["Bb3", "D4", "F4"];
+const Bb7 = ["Bb3", "D4", "Ab4"];
 const Gm = ["G3", "Bb3", "D4"];
 const Eb = ["Eb4", "G4", "Bb4"];
 const F = ["F4", "A4", "C5"];
@@ -13,9 +14,11 @@ const Am = ["A3", "C4", "E4"];
 const A = ["A3", "C#4", "E4"];
 const C = ["C4", "E4", "G4"];
 const D = ["D4", "F#4", "A4"];
+const D7 = ["D4", "F#4", "C5"];
 
 type Note = [string, number];
 type Line = [string[], string];
+type Row = [string[], Note[]];
 
 // "E4 G4:2 -:4 ~:8" -> [note, sixteenths]; the length defaults to one sixteenth
 const m = (s: string): Note[] =>
@@ -44,6 +47,11 @@ const flourish = (c: string[], s: string): Note[] => [
   [transpose(c[0], 24), 1],
 ];
 
+// orig: a score bar unchanged on the 3+3+2 grid; bar: a reworked 4/4 bar
+const orig = ([c, s]: Line): Row => [c, tresillo(s)];
+const bar = (c: string[], s: string): Row => [c, m(s)];
+
+// the chorus, bars 42-57 of the score
 const THEME: Line[] = [
   [Eb, "Eb5:4 G5:2 A5:2 Bb5:4"],
   [F, "D5:4 G5:2 A5:2 Bb5:4"],
@@ -62,6 +70,7 @@ const THEME: Line[] = [
   [Gm, "G4:12"],
 ];
 
+// bars 10-16
 const VERSE: Line[] = [
   [Bb, "D5:4 E5:4 F5:4"],
   [Am, "A5:4 F5:4 E5:4"],
@@ -72,17 +81,7 @@ const VERSE: Line[] = [
   [Dm, "D5:8 C5:4"],
 ];
 
-const VERSE_LOW: Line[] = [
-  [Bb, "D4:4 E4:4 F4:4"],
-  [Am, "A4:4 F4:4 E4:4"],
-  [Gm, "D4:8 C4:4"],
-  [F, "A3:8 A3:4"],
-  [Bb, "D4:4 E4:4 F4:4"],
-  [A, "G4:4 F4:4 E4:4"],
-  [Dm, "D4:8 C4:4"],
-  [Dm, "D4:12"],
-];
-
+// bars 25-41
 const BRIDGE: Line[] = [
   [Gm, "Bb4:8 C5:4"],
   [A, "A4:8 A4:4"],
@@ -99,45 +98,108 @@ const BRIDGE: Line[] = [
   [Bb, "~:4 G5:4 A5:4"],
   [C, "G5:4 C6:4 E6:4"],
   [D, "D6:8 -:4"],
-  [D, "C5:12"],
+  [D7, "C5:12"],
 ];
 
-// the theme head chopped into a call over I-vi-IV-V, each call landing on a chord tone
-const INTRO: Line[] = [
-  [Bb, "D5:3 D5:3 G5:3 A5:3 Bb5:4"],
-  [Gm, "-:8 D6:2 C6:2 Bb5:4"],
-  [Eb, "Eb5:3 Eb5:3 G5:3 A5:3 Bb5:4"],
-  [F, "-:8 C6:2 A5:2 F5:4"],
-  [Bb, "D5:3 D5:3 G5:3 A5:3 Bb5:4"],
-  [Gm, "-:8 G5:2 Bb5:2 D6:4"],
-  [Eb, "Eb6:4 D6:4 C6:4 Bb5:4"],
-  [F, "A5:4 C6:4 F5:4 C5:4"],
+// the chorus head with its own chords, so the tune names itself
+const INTRO: Row[] = THEME.slice(0, 8).map(orig);
+
+// G-A-Bb from the chorus head, repeated every two beats, then every beat, then every half beat
+const BUILD: Row[] = [
+  bar(Eb, "Eb5:4 G5 A5 Bb5:2 Eb5:4 G5 A5 Bb5:2"),
+  bar(F, "D5:4 G5 A5 Bb5:2 D5:2 G5 A5 Bb5:2 C6:2"),
+  bar(Ab, "Eb5 Ab5 C6:2 Eb5 Ab5 C6:2 Eb5 Ab5 C6:2 Eb5 Ab5 C6:2"),
+  bar(Bb7, "A5 Bb5 A5 Bb5 A5 Bb5 A5 Bb5 D6 Bb5 D6 Bb5 F6:4"),
 ];
 
-const BUILD: Line[] = [
-  [Bb, "D5:2 F5:2 Bb5:2 D6:2 D5:2 F5:2 Bb5:2 D6:2"],
-  [Gm, "D5:2 G5:2 Bb5:2 D6:2 D5:2 G5:2 Bb5:2 D6:2"],
-  [Eb, "Eb5:2 G5:2 Bb5:2 Eb6:2 G6:2 Eb6:2 Bb5:2 G5:2"],
-  [F, "A5:4 C6:4 F6:8"],
+// the chorus with its long notes chopped into repeated eighths, sixteenths and offbeats
+const DROP1: Row[] = [
+  orig(THEME[0]),
+  orig(THEME[1]),
+  bar(Gm, "C6:2 C6 C6 -:1 C6:2 Bb5:1 -:1 Bb5:2 Bb5:1 A5:2 Bb5:2"),
+  bar(F, "A5:2 A5 A5 F5:2 F5 F5 C5:2 C5 C5 C5:4"),
+  bar(Eb, "F5:3 Bb5:3 C6:2 Db6:3 Db6:3 Db6:2"),
+  bar(Ab, "C6:2 C6:2 -:1 Ab5:2 Ab5:1 -:2 Eb5:2 Eb5:1 Eb5:1 Eb5:2"),
+  bar(Bb, "F5 F5 F5 F5 F5:2 F5:2 F5:3 Bb5:3 Bb5:2"),
+  bar(F, "A5:3 Eb6:3 C6:2 A5 A5 C6 C6 Eb6:2 C6:2"),
+  orig(THEME[8]),
+  orig(THEME[9]),
+  bar(Gm, "Bb5 Bb5 G5 G5 D5 D5 Bb5:2 -:1 Bb5:1 A5:2 A5 A5 A5:2"),
+  bar(F, "A5 A5 F5:2 C5 C5 F5:2 A5 A5 F5:2 C5:4"),
+  bar(Eb, "Bb4:3 Bb4:3 G4:2 A4:2 Bb4:2 Bb4 Bb4 G4:2"),
+  bar(F, "A4:3 A4:3 F4:2 A4 A4 C5 C5 F5:4"),
+  bar(Gm, "G4:2 G4 G4 G4:2 G4 G4 D5:2 D5 D5 G5:4"),
+  bar(G, "G5:3 G5:3 B5:2 D6:2 D6 D6 B5:4"),
+];
+
+// the verse as written, an octave lower
+const BREAK: Row[] = [...VERSE, [Dm, "D5:8 A4:4"] as Line].map(([c, s]) => [c, tresillo(s).map(([n, l]) => [n === "~" || n === "-" ? n : transpose(n, -12), l])]);
+
+// D-E-F from the verse, first with gaps, then back to back
+const REBUILD: Row[] = [
+  bar(Bb, "D5:2 E5:2 F5:4 -:8"),
+  bar(Am, "A5:2 F5:2 E5:4 -:8"),
+  bar(Gm, "D5:2 E5:2 F5:4 D5:2 E5:2 F5:4"),
+  bar(F, "A5:2 F5:2 E5:2 F5:2 A5:2 F5:2 C6:4"),
+  bar(Bb, "D5 E5 F5 -:1 D5 E5 F5 -:1 D5 E5 F5 -:1 D5 E5 F5 -:1"),
+  bar(A, "G5 F5 E5 -:1 G5 F5 E5 -:1 G5 F5 E5 -:1 A5:4"),
+  bar(Dm, "D5 E5 F5 A5 D5 E5 F5 A5 D5 E5 F5 A5 D5 E5 F5 A5"),
+  bar(D, "F#5 A5 D6 F#5 A5 D6 F#5 A5 D6:8"),
+];
+
+// the bridge with its long notes broken into chord arpeggios
+const DROP2: Row[] = [
+  orig(BRIDGE[0]),
+  orig(BRIDGE[1]),
+  bar(Bb, "Bb4 D5 F5 Bb5 F5 D5 C5 F5 Bb5 D6 Bb5 F5 D5 F5 Bb5 D6"),
+  bar(A, "C#5 E5 A5 C#6 A5 E5 Bb4 C#5 E5 A5 E5 C#5 A4:2 G4:2"),
+  bar(Bb, "G4 Bb4 D5 F5 Bb5 F5 C5 D5 F5 Bb5 F5 D5 D5 F5 Bb5 D6"),
+  bar(C, "E5 G5 C6 E6 C6 G5 F5 G5 C6 E6 C6 G5 G5 C6 E6 C6"),
+  bar(Dm, "F5 A5 D6 A5 F5 D5 F5 A5 D6 A5 F5 D5 -:2 G5 A5"),
+  [Dm, flourish(Dm, BRIDGE[7][1])],
+  orig(BRIDGE[8]),
+  orig(BRIDGE[9]),
+  bar(Bb, "F5 Bb5 D6 Bb5 F5 D5 G5 Bb5 D6 Bb5 G5 F5 A5 D6 F6 D6"),
+  bar(A, "G5 A5 C#6 A5 G5 E5 F5 A5 C#6 A5 F5 E5 E5:2 F5:2"),
+  bar(Bb, "F5:2 G5 A5 F5:2 G5 A5 F5:2 G5 A5 G5:2 A5:2"),
+  bar(C, "G5 C6 E6 C6 G5 E5 C6 E6 G6 E6 C6 G5 E6 C6 G5 E6"),
+  bar(D, "D6 A5 F#5 A5 D6 A5 F#5 A5 D6 F#6 D6 A5 -:4"),
+  bar(D7, "C5 D5 F#5 A5 C6 A5 F#5 D5 C5 D5 F#5 A5 C6:4"),
+];
+
+// the chorus again, its notes leaping between octaves; the last bar is the head's dominant
+const DROP3: Row[] = [
+  orig(THEME[0]),
+  orig(THEME[1]),
+  bar(Gm, "C6:2 C5:2 C6:2 Bb5:2 Bb4:2 Bb5:2 A4:2 Bb5:2"),
+  bar(F, "A5:2 A4:2 A5:2 F5:2 F4:2 F5:2 C6:2 C5:2"),
+  bar(Eb, "F5:2 F4:2 F5:2 Bb4 Bb5:2 C5 C6:2 Db6:2 Db5:2"),
+  bar(Ab, "C6:2 C5:2 C6:2 Ab5:2 Ab4:2 Ab5:2 Eb5:2 Eb6:2"),
+  bar(Bb, "F5:2 F6:2 F5:2 F6:2 F5:2 F6:2 Bb5:2 Bb4:2"),
+  bar(F, "A5:2 A4:2 A5:2 Eb6:2 Eb5:2 Eb6:2 C6:2 C5:2"),
+  orig(THEME[8]),
+  orig(THEME[9]),
+  bar(Gm, "Bb5 Bb4 G5 G4 D5 D6 Bb5 Bb4 G5 G4 D5 D6 A5:2 A4:2"),
+  bar(F, "A5 A4 F5 F4 C5 C6 F5 F4 A5 A4 F5 F4 C6:2 C5:2"),
+  bar(Eb, "Bb4:2 Bb5:2 Bb4:2 G5 G4 A5 A4 Bb5:2 Bb4:2 G5:2"),
+  bar(F, "A4:2 A5:2 A4:2 F5:2 F4:2 F5:2 A5:2 C6:2"),
+  bar(Gm, "G4:2 G5:2 G4:2 G5:2 D5:2 D6:2 Bb5:2 G5:2"),
+  bar(Bb7, "F5:2 F6:2 D6:2 Bb5:2 Ab5:2 F5:2 D5:4"),
 ];
 
 type Flags = Omit<ChipBar, "c" | "m">;
-const section = (lines: Line[], toNotes: (c: string[], s: string, i: number) => Note[], flags: (i: number) => Flags): ChipBar[] =>
-  lines.map(([c, s], i) => ({ c, m: toNotes(c, s, i), ...flags(i) }));
-
-const as4 = (_: string[], s: string) => m(s);
-const swung = (_: string[], s: string) => tresillo(s);
+const section = (rows: Row[], flags: (i: number) => Flags): ChipBar[] => rows.map(([c, m], i) => ({ c, m, ...flags(i) }));
 const full = { arp: true, bass: true, kick: true, snare: true, hat: 16 as const };
 
-// the first drop ends on the score's G major; the last one stops on F so the loop resolves into the Bb intro
+// the last bar's Bb7 and its D resolve into the Eb and Eb that open the intro
 const bars: ChipBar[] = [
-  ...section(INTRO, as4, (i) => ({ arp: true, bass: true, kick: i >= 4, hat: 8 })),
-  ...section(BUILD, as4, (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
-  ...section([...THEME, [G, "D5:12"]], swung, (i) => ({ ...full, crash: i === 0 || i === 8 })),
-  ...section(VERSE_LOW, swung, (i) => ({ arp: true, bass: true, kick: true, hat: 8, crash: i === 0 })),
-  ...section([...VERSE, [Dm, "D5:8 A4:4"]], swung, (i) => ({ ...full, roll: i === 7 })),
-  ...section(BRIDGE, (c, s, i) => (i === 7 ? flourish(c, s) : tresillo(s)), (i) => ({ ...full, harm: i >= 8, crash: i === 0 || i === 8, roll: i === 15 })),
-  ...section([...THEME, [F, "A4:4 C5:4 F5:4"]], swung, (i) => ({ ...full, harm: true, crash: i === 0 || i === 8 })),
+  ...section(INTRO, (i) => ({ arp: true, kick: i >= 4, hat: i >= 4 ? 8 : undefined })),
+  ...section(BUILD, (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
+  ...section(DROP1, (i) => ({ ...full, crash: i === 0 || i === 8 })),
+  ...section(BREAK, () => ({ arp: true })),
+  ...section(REBUILD, (i) => ({ arp: true, bass: true, kick: true, snare: i >= 4, hat: i >= 4 ? 16 : 8, roll: i === 7 })),
+  ...section(DROP2, (i) => ({ ...full, harm: i >= 8, crash: i === 0 || i === 8 })),
+  ...section(DROP3, (i) => ({ ...full, harm: true, crash: i === 0 || i === 8 })),
 ];
 
 export const kappa: ChipPiece = {
