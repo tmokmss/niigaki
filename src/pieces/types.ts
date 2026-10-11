@@ -76,6 +76,7 @@ export type FuturePiece = {
   description: string;
   bpm: number;
   visual?: "danmaku";
+  hues?: number[];
   bars: FutureBar[];
 };
 
