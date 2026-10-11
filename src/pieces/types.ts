@@ -52,4 +52,31 @@ export type ChipPiece = {
   bars: ChipBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece;
+// c: chord with its 7th/9th, root A3-G4 first; c2: chord for beats 3-4; open: low-pass opening 0-1, reached by the end of the bar
+export type FutureBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  chord?: "pad" | "stab" | "wobble";
+  open?: number;
+  bass?: boolean;
+  kick?: boolean;
+  clap?: boolean;
+  hat?: boolean;
+  roll?: 4 | 8 | 16 | 32;
+  riser?: boolean;
+  gap?: boolean;
+  crash?: boolean;
+};
+
+export type FuturePiece = {
+  kind: "future";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  bars: FutureBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece;
