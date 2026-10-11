@@ -3,6 +3,7 @@ import type { ChipPiece, Piece } from "../pieces/types";
 import { chipKit, renderChip } from "./chip";
 import { danmaku } from "./danmaku";
 import { dnbKit, renderDnb } from "./dnb";
+import { dubstepKit, renderDubstep } from "./dubstep";
 import { futureKit, renderFuture } from "./future";
 import { lofiKit, renderLofi } from "./lofi";
 import { pianoKit, renderPiano, sparks } from "./piano";
@@ -27,7 +28,9 @@ export function mount(
           ? lofiKit(piece.bpm)
           : piece.kind === "dnb"
             ? dnbKit(piece.bpm)
-            : pianoKit(piece.bpm);
+            : piece.kind === "dubstep"
+              ? dubstepKit(piece.bpm)
+              : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
     select.addEventListener("change", () => {
@@ -74,7 +77,9 @@ export function mount(
             ? renderLofi(piece)
             : piece.kind === "dnb"
               ? renderDnb(piece)
-              : renderPiano(piece);
+              : piece.kind === "dubstep"
+                ? renderDubstep(piece)
+                : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
