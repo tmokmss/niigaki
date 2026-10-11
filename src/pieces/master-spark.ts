@@ -69,7 +69,7 @@ const CHORUS: Line[] = [
   [Gm9, null, "G5:2 A5:2 Bb5:2 -:2 A5:2 G5:2 F5:2 G5:2"],
   [Gm69, null, "~:10 D5:2 G5:2 D5:2"],
   [Ebmaj9, null, "G5:2 A5:2 Bb5:2 -:2 A5:2 G5:2 F5:2 D6:2"],
-  [Ebmaj9, null, "~:10 C6:2 Bb5:2 A5:2"],
+  [Ebmaj9, Eb69, "~:10 C6:2 Bb5:2 A5:2"],
   [Cm9, F9, "G5:2 A5:2 Bb5:2 -:2 A5:2 G5:2 F5:2 D6:2"],
   [F9, D7b13, "~:2 C6:2 Bb5:2 C6:2 Bb5:2 A5:2 G5:2 F5:2"],
 ];
@@ -79,7 +79,7 @@ const LOW: Line[] = [
   [Gm9, null, "G4:2 A4:2 Bb4:2 -:2 A4:2 G4:2 F4:2 G4:2"],
   [Gm69, null, "~:8 Bb4:2 D5:2 F5:2 A5:2"],
   [Ebmaj9, null, "G4:2 A4:2 Bb4:2 -:2 A4:2 G4:2 F4:2 D5:2"],
-  [Ebmaj9, null, "~:8 G5:2 F5:2 D5:2 Bb4:2"],
+  [Ebmaj9, Eb69, "~:8 G5:2 F5:2 D5:2 Bb4:2"],
   [Cm9, F9, "G4:2 A4:2 Bb4:2 -:2 A4:2 G4:2 F4:2 D5:2"],
   [F9, D7b13, "~:2 C5:2 Bb4:2 C5:2 Bb4:2 A4:2 G4:2 F4:2"],
 ];
@@ -88,7 +88,7 @@ const TRESILLO: Line[] = [
   [Gm9, null, "G5:3 A5:3 Bb5:2 A5:3 G5:3 F5:2"],
   [Gm69, null, "G5:8 D5:3 G5:3 D5:2"],
   [Ebmaj9, null, "G5:3 A5:3 Bb5:2 A5:3 G5:3 D6:2"],
-  [Ebmaj9, null, "~:8 C6:3 Bb5:3 A5:2"],
+  [Ebmaj9, Eb69, "~:8 C6:3 Bb5:3 A5:2"],
   [Cm9, F9, "G5:3 A5:3 Bb5:2 A5:3 G5:3 D6:2"],
   [F9, D7b13, "~:2 C6:2 Bb5:2 C6:2 Bb5:3 A5:3 F5:2"],
 ];
@@ -98,7 +98,7 @@ const APPROACH: Line[] = [
   [Gm9, null, "Gb5 G5 A5:2 Bb5:2 -:2 A5:2 G5:2 F5:2 G5:2"],
   [Gm69, null, "~:10 Db5 D5 G5:2 D5:2"],
   [Ebmaj9, null, "Gb5 G5 A5:2 Bb5:2 -:2 A5:2 G5:2 F5:2 D6:2"],
-  [Ebmaj9, null, "~:10 Db6 C6 Bb5:2 A5:2"],
+  [Ebmaj9, Eb69, "~:10 Db6 C6 Bb5:2 A5:2"],
   [Cm9, F9, "Gb5 G5 A5:2 Bb5:2 -:2 A5:2 G5:2 Gb5 F5 D6:2"],
   [F9, D7b13, "~:2 C6:2 Bb5:2 C6:2 Bb5:2 A5:2 G5:2 F5:2"],
 ];

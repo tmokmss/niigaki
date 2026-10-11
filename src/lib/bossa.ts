@@ -1,18 +1,18 @@
 import * as Tone from "tone";
 import type { BossaPiece } from "../pieces/types";
-import { collector, midi, transpose, type Kit, type NoteEvent } from "./score";
+import { collector, transpose, type Kit, type NoteEvent } from "./score";
 
 // in sixteenth steps (a 4/4 bar here holds two 2/4 bars of the usual notation), as João Gilberto plays The Girl from Ipanema:
-// every bar the fingers pinch the whole chord on 1, 2 and the and of 3, and let it ring; the cross-stick plays the two-bar bossa clave
+// every bar the fingers pinch the chord on 1, 2 and the and of 3, and let it ring; the cross-stick plays the two-bar bossa clave
 const FINGERS = [0, 4, 10];
-// fingerpicking for the quiet bars: [step, which string counting up from the fifth over the root]
+// fingerpicking for the quiet bars: [step, which finger note counting up from the lowest]
 const ARP = [
-  [2, 1],
-  [4, 2],
-  [6, 3],
-  [10, 2],
-  [12, 3],
-  [14, 4],
+  [2, 0],
+  [4, 1],
+  [6, 2],
+  [10, 1],
+  [12, 2],
+  [14, 3],
 ];
 const CLAVE = [
   [0, 6, 12],
@@ -35,11 +35,8 @@ export function renderBossa(piece: BossaPiece) {
     const thumb = (step: number) => (step === 0 ? bar.c[0] : bar.c2 ? bar.c2[0] : transpose(bar.c[0], -5));
     const next = piece.bars[(i + 1) % piece.bars.length];
 
-    // the fingers take every string above the thumb: the chord's fifth over the root, then the voicing
-    const chord = (step: number) => {
-      const c = at(step);
-      return [transpose(c[0], 7), ...c.slice(1)].sort((x, y) => midi(x) - midi(y));
-    };
+    // the fingers take the top three or four strings, apart from the thumb's bass
+    const chord = (step: number) => at(step).slice(1);
     if (bar.arp) {
       // one string at a time between the thumb's notes, up and back down, each left ringing to the half bar
       for (const [s, k] of ARP) {
@@ -111,7 +108,7 @@ export function bossaKit(bpm: number): Kit {
   // the dry saxophone sounds thin: soften its top and give it a longer, deeper hall of its own on top of the room
   const saxRoom = new Tone.Filter(3200, "lowpass");
   saxRoom.chain(new Tone.Reverb({ decay: 3.2, wet: 0.45 }), reverb);
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -14, reverb);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -12, reverb);
   const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.6, -11, saxRoom);
 
   const bass = new Tone.PolySynth(Tone.Synth, {
