@@ -69,43 +69,104 @@ const EIGHTHS = [
 ];
 const EIGHTH_CHORDS = [Dm, G, E, Am, F, G, E, E];
 
-// the opening motif C-E-A-E chopped into a call over i-VI-VII-V, each call landing on a chord tone
-const INTRO: Line[] = [
-  [Am, "C6:3 E6:3 A6:2 E6:3 C6:5"],
-  [F, "-:8 F6:2 C6:2 A5:4"],
-  [G, "B5:3 D6:3 G6:2 D6:3 B5:5"],
-  [E, "-:8 E6:2 B5:2 G#5:4"],
-  [Am, "C6:3 E6:3 A6:2 E6:3 C6:5"],
-  [F, "-:8 A5:2 C6:2 F6:4"],
-  [G, "G6:4 D6:4 B5:4 G5:4"],
-  [E, "G#6:4 E6:4 B5:4 G#5:4"],
+// the rebuild hands the eighth-note tune over to the theme head, chopped tighter each bar
+const REBUILD: Line[] = [
+  [F, "A5:2 C6:2 F6:2 -:2 A5:2 C6:2 F6:2 -:2"],
+  [G, "B5:2 D6:2 G6:2 B5:2 D6:2 G6:2 B5:2 D6:2"],
+  [E, "B5 E6 G#6 B5 E6 G#6 B5 E6 G#6 B5 E6 G#6 B5 E6 G#6 B6"],
+  [E, "E6 G#6 B6 E6 G#6 B6 E6 G#6 B6:8"],
+];
+const zip = (chords: string[][], mel: string[]): Line[] => chords.map((c, i) => [c, mel[i]]);
+
+// the head of the theme chopped and repeated, each call closer to the last
+const BUILD: Line[] = [
+  [Am, "C6:2 E6:2 A6:2 -:2 C6:2 E6:2 A6:2 -:2"],
+  [C, "C6:2 E6:2 G6:2 C6:2 E6:2 G6:2 C6:2 E6:2"],
+  [F, "A5 C6 F6 A5 C6 F6 A5 C6 F6 A5 C6 F6 A5 C6 F6 A6"],
+  [E, "G#5 B5 E6 G#5 B5 E6 G#6:2 B6:8"],
 ];
 
-const BUILD: Line[] = [
-  [Am, "A5:2 C6:2 E6:2 A6:2 A5:2 C6:2 E6:2 A6:2"],
-  [F, "A5:2 C6:2 F6:2 A6:2 A5:2 C6:2 F6:2 A6:2"],
-  [E, "G#6:2 E6:2 B5:2 G#5:2 B5:4 D6:4"],
-  [E, "E6:4 G#6:4 B6:8"],
+// restruck: long notes become repeated eighths and sixteenths with offbeat pushes
+const DROP1: Line[] = [
+  THEME[0],
+  THEME[1],
+  [D, "D6:3 D6:3 F#6:2 F#6 F#6 D6:2 A5:2 D6:2"],
+  [F, "A5 A5 A5:2 C6:3 A5:3 F5:2 A5 A5 C6:2"],
+  [Am, "C6:2 E6:2 A6:2 C6:2 E6:2 A6:2 E6:2 A5:2"],
+  [C, "E6:3 E6:3 G6:2 E6 E6 C6:2 G5:2 C6:2"],
+  [E, "B5:3 B5:3 E6:2 G#6 G#6 E6:2 B5:2 G#5:2"],
+  [F, "F6:3 C6:3 A5:2 C6 C6 A5 A5 F5:2 A5:2"],
+  ANSWER[0],
+  ANSWER[1],
+  [D, "C6 C6 C6:2 -:1 C6:3 B5 A5:2 B5 D5 F#5 A5 D6"],
+  [F, "C6:2 C6 C6 A5:2 A5 A5 F5:2 F5 F5 A5 C6 F6:2"],
+  [Am, "A5:2 A5 A5 E5:2 A5:2 C6:3 E6:3 C6:2"],
+  ANSWER[5],
+  [D, "F#5:3 F#5:3 A5:2 D6 D6 A5:2 F#5 F#5 D5:2"],
+  ANSWER[7],
+];
+
+// held notes broken into chord arpeggios running up and down
+const DROP2: Line[] = [
+  THEME[0],
+  THEME[1],
+  [D, "D6 F#6 A6 F#6 D6 A5 D6 F#6 A6 F#6 D6 A5 F#5 A5 D6 F#6"],
+  [F, "F5 A5 C6 F6 C6 A5 F5 A5 C6 F6 A6 F6 C6 A5 C6:2"],
+  [Am, "A5 C6 E6 A6 E6 C6 A5 C6 E6 A6 C7 A6 E6 C6 A5:2"],
+  [C, "C6 E6 G6 C7 G6 E6 C6 E6 G6 E6 C6 G5 E5 G5 C6:2"],
+  [E, "B5 E6 G#6 B6 G#6 E6 B5 E6 G#6 E6 B5 G#5 E5 G#5 B5:2"],
+  THEME[7],
+  ANSWER[0],
+  [C, "E6 G6 E6 C6 E6 G6 E6 C6 B5:2 C6:2 G6:2 C6:2"],
+  [D, "A5 D6 F#6 A6 F#6 D6 A5 D6 F#5 A5 D6 F#6 A6:4"],
+  ANSWER[3],
+  [Am, "A4 C5 E5 A5 C6 E6 A6 E6 C6 A5 E5 C5 E5 A5 C6 E6"],
+  [C, "G5 E5 C5 E5 G5 C6 E6 G6 E6 C6 G5 E5 C6:4"],
+  [D, "D5 F#5 A5 D6 F#5 A5 D6 F#6 A5 D6 F#6 A6 D6 F#6 A6 D7"],
+  ANSWER[7],
 ];
 
 type Flags = Omit<ChipBar, "c" | "m">;
-const section = (lines: Line[], toNotes: (s: string, i: number) => Note[], flags: (i: number) => Flags): ChipBar[] =>
-  lines.map(([c, s], i) => ({ c, m: toNotes(s, i), ...flags(i) }));
-const zip = (chords: string[][], mel: string[]): Line[] => chords.map((c, i) => [c, mel[i]]);
+type Bar = [string[], Note[]];
+const section = (lines: Bar[], flags: (i: number) => Flags): ChipBar[] => lines.map(([c, mel], i) => ({ c, m: mel, ...flags(i) }));
+const as4 = (lines: Line[]): Bar[] => lines.map(([c, s]) => [c, m(s)]);
+
+// every other note drops an octave, so the line leaps between two registers
+const leap = (notes: Note[]): Note[] => {
+  let k = 0;
+  return notes.map(([note, n]) => (note === "~" || note === "-" ? [note, n] : [k++ % 2 ? transpose(note, -12) : note, n]));
+};
+
+// octave leaps over the theme head, then the eighth-note tune an octave up
+const DROP3: Bar[] = [
+  ...as4(THEME.slice(0, 2)),
+  [D, leap(m(THEME[2][1]))],
+  [F, leap(m(THEME[3][1]))],
+  [Am, leap(m(THEME[4][1]))],
+  [C, m("C6:2 E6:2 G6:2 C6:2 E6:2 G6:2 C7:4")],
+  [E, leap(m(THEME[6][1]))],
+  [F, m(THEME[7][1])],
+  [Dm, leap(up(EIGHTHS[0]))],
+  [G, leap(up(EIGHTHS[1]))],
+  [E, up(EIGHTHS[2])],
+  [Am, leap(up(EIGHTHS[3]))],
+  [F, leap(up(EIGHTHS[4]))],
+  [G, leap(m(EIGHTHS[5]))],
+  [E, m(EIGHTHS[6])],
+  [E, m(EIGHTHS[7])],
+];
 
 const full = { arp: true, bass: true, kick: true, snare: true, hat: 16 as const };
 
-// the slow middle tune breathes in the break and returns an octave up in the last drop;
-// the last bar rests on E and its B steps up to the C that opens the intro
+// the intro names the original with its theme over its own chords; the last bar rests on E and its B steps up to the C that opens the intro
 const bars: ChipBar[] = [
-  ...section(INTRO, m, (i) => ({ arp: true, bass: true, kick: i >= 4, hat: 8 })),
-  ...section(BUILD, m, (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
-  ...section([...THEME, ...ANSWER], m, (i) => ({ ...full, crash: i === 0 || i === 8 })),
-  ...section(zip(SLOW_CHORDS, SLOW), m, (i) => ({ arp: true, bass: true, kick: true, hat: 8, crash: i === 0 })),
-  ...section(zip(EIGHTH_CHORDS, EIGHTHS), m, (i) => ({ ...full, roll: i === 7 })),
-  ...section([...THEME, ...ANSWER], m, (i) => ({ ...full, harm: i >= 8, crash: i === 0 || i === 8, roll: i === 15 })),
-  ...section(zip(SLOW_CHORDS, SLOW), up, (i) => ({ ...full, harm: true, crash: i === 0 })),
-  ...section(zip(EIGHTH_CHORDS, EIGHTHS), (s, i) => (i < 5 ? up(s) : m(s)), (i) => ({ ...full, harm: true, crash: i === 0 })),
+  ...section(as4(THEME), (i) => ({ arp: true, ...(i >= 4 && { kick: true, hat: 8 as const }) })),
+  ...section(as4(BUILD), (i) => ({ arp: true, bass: true, kick: true, hat: 16, roll: i === 3 })),
+  ...section(as4(DROP1), (i) => ({ ...full, crash: i === 0 || i === 8 })),
+  ...section(as4(zip(SLOW_CHORDS, SLOW)), (i) => ({ arp: true, bass: true, crash: i === 0 })),
+  ...section(as4([...zip(EIGHTH_CHORDS, EIGHTHS).slice(0, 4), ...REBUILD]), (i) => ({ arp: true, bass: true, kick: true, hat: i < 4 ? 8 : 16, snare: i >= 4, roll: i === 7 })),
+  ...section(as4(DROP2), (i) => ({ ...full, harm: i >= 8, crash: i === 0 || i === 8, roll: i === 15 })),
+  ...section(DROP3, (i) => ({ ...full, harm: true, crash: i === 0 })),
 ];
 
 export const voile: ChipPiece = {
