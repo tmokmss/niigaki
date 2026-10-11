@@ -1,5 +1,6 @@
 import { afterglow } from "./afterglow";
 import { greenEyed } from "./green-eyed";
+import { greenEyedDnb } from "./green-eyed-dnb";
 import { kamigami } from "./kamigami";
 import { kappa } from "./kappa";
 import { karakasa } from "./karakasa";
@@ -12,4 +13,4 @@ import { verdigris } from "./verdigris";
 import { vertex } from "./vertex";
 import { voile } from "./voile";
 
-export const pieces = [nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
+export const pieces = [greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];

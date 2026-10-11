@@ -104,4 +104,29 @@ export type LofiPiece = {
   bars: LofiBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece;
+// c: chord with its 7th/9th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
+// beat: two-step drums with ghost notes and shuffled hats; hat: the hats alone; open: pad low-pass 0-1, reached by the end of the bar
+export type DnbBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  beat?: boolean;
+  hat?: boolean;
+  bass?: boolean;
+  roll?: 4 | 8 | 16;
+  open?: number;
+  crash?: boolean;
+};
+
+export type DnbPiece = {
+  kind: "dnb";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: DnbBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece;
