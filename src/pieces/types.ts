@@ -144,7 +144,8 @@ export type DubstepBar = {
   c2?: string[];
   m?: [string, number][];
   open?: number;
-  saw?: boolean;
+  // supersaw lead over the piano, 0-1
+  saw?: number;
   wobble?: 4 | 8 | 12;
   beat?: boolean;
   hat?: boolean;

@@ -107,17 +107,17 @@ type Flags = Omit<DubstepBar, "c" | "c2" | "m">;
 const section = (lines: Line[], flags: (i: number) => Flags): DubstepBar[] =>
   lines.map(([c, c2, s], i) => ({ c, ...(c2 ? { c2 } : {}), m: m(s), ...flags(i) }));
 
-// the second half of a build: riser, a tightening snare roll, the supersaw lead joining, and silence on the last beat
-const rise = (i: number): Flags => ({ riser: true, saw: true, roll: ([4, 8, 16, 32] as const)[i - 4], open: 0.55 + (i - 3) * 0.1, gap: i === 7 });
+// the second half of a build: riser, a tightening snare roll, the supersaw lead swelling, and silence on the last beat
+const rise = (i: number): Flags => ({ riser: true, saw: 0.6 + (i - 4) * 0.1, roll: ([4, 8, 16, 32] as const)[i - 4], open: 0.55 + (i - 3) * 0.1, gap: i === 7 });
 // heavy quarter-note wobbles, eighths every other bar, triplets on the turnaround
-const drop = (rates: (4 | 8 | 12)[]) => (i: number): Flags => ({ beat: true, saw: true, wobble: rates[i % 4], crash: i % 8 === 0 });
+const drop = (rates: (4 | 8 | 12)[]) => (i: number): Flags => ({ beat: true, saw: 1, wobble: rates[i % 4], crash: i % 8 === 0 });
 
 const bars: DubstepBar[] = [
   ...section(THEME, (i) => ({ open: 0.12 + i * 0.02, hat: i >= 4, crash: i === 0 })),
-  ...section(BUILD, (i) => (i < 4 ? { beat: true, open: 0.3 + i * 0.05 } : rise(i))),
+  ...section(BUILD, (i) => (i < 4 ? { beat: true, open: 0.3 + i * 0.05, saw: [0, 0, 0.2, 0.35][i] } : rise(i))),
   ...section(DROP, drop([4, 8, 4, 12])),
   ...section(BREAK, (i) => ({ open: 0.3, crash: i === 0 })),
-  ...section(THEME.slice(0, 4), (i) => ({ open: 0.35 + i * 0.04, hat: i < 2, beat: i >= 2 })),
+  ...section(THEME.slice(0, 4), (i) => ({ open: 0.35 + i * 0.04, hat: i < 2, beat: i >= 2, saw: [0, 0.2, 0.3, 0.45][i] })),
   ...section(BUILD.slice(4), (i) => rise(i + 4)),
   ...section(DROP2, drop([8, 4, 8, 12])),
 ];

@@ -65,7 +65,7 @@ export function renderDubstep(piece: DubstepPiece) {
         add(mt, "lead", note, dur, 0.65);
         held = [events[events.length - 1]];
         if (bar.saw) {
-          add(mt, "saw", note, dur * 0.95, 0.8);
+          add(mt, "saw", note, dur * 0.95, 0.8 * bar.saw);
           held.push(events[events.length - 1]);
         }
       }
