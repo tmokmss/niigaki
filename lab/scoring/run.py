@@ -105,7 +105,7 @@ def evaluate(model, p, lead, chords):
         "accidents": len(reasons),
         "reasons": sorted(set(reasons)),
         "quality": coherence(gen, gen_chords) if gen else 0.0,
-        "m": to_m(lead, BARS, 4)[LISTEN_FROM:],
+        "m": to_m(lead, BARS, 4, 4)[LISTEN_FROM:],
         "notes": len(gen),
     }
 
@@ -121,7 +121,7 @@ def explore_part(model, p):
         top_p = TOP_P[i % len(TOP_P)]
         torch.manual_seed(i)
         raw = amt.infill(model, prompt, chords, KEEP * bar, BARS * bar, top_p)
-        gen = quantize([x for x in raw if x[0] >= KEEP * bar - 1e-6], p["bpm"], p["beats"], BARS * bar)
+        gen = quantize([x for x in raw if x[0] >= KEEP * bar - 1e-6], p["bpm"], p["beats"], BARS * bar, 4)
         cid = f"c{i:03d}"
         lines[cid] = prompt + gen
         cands.append({"id": cid, "source": f"top_p={top_p}", "seed": i, **evaluate(model, p, prompt + gen, chords)})

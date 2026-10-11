@@ -90,18 +90,23 @@ def _lead_only(logits, _history):
     return logits + mask
 
 
-def infill(model, prompt_lead, chords, start, end, top_p):
+_nucleus = sample.nucleus
+
+
+def infill(model, prompt_lead, chords, start, end, top_p, temperature=1.0):
     """A new lead line from `start` to `end` seconds over fixed chords, continuing `prompt_lead`.
 
     The whole accompaniment is given as anticipated controls, so the lead is the only instrument the model writes.
+    A temperature above 1 loosens the model's grip on a loop it has heard repeated.
     """
     sample.instr_logits = _lead_only
+    sample.nucleus = lambda logits, p: _nucleus(logits / temperature, p)
     inputs = _tokens([(n["t"], 2, n["dur"], n["pitch"], LEAD) for n in prompt_lead])
     controls = [CONTROL_OFFSET + tok for tok in _tokens(accompaniment(chords))]
     out = sample.generate(model, start, end, inputs=inputs, controls=controls, top_p=top_p)
     notes = []
     for t, d, note in zip(out[0::3], out[1::3], out[2::3]):
         note -= NOTE_OFFSET
-        if note // MAX_PITCH == LEAD and (t - TIME_OFFSET) / TIME_RESOLUTION >= start - 1e-6:
+        if note // MAX_PITCH == LEAD and t - TIME_OFFSET >= int(TIME_RESOLUTION * start):
             notes.append(((t - TIME_OFFSET) / TIME_RESOLUTION, (d - DUR_OFFSET) / TIME_RESOLUTION, note % MAX_PITCH))
     return notes

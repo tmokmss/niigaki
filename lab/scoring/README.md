@@ -18,4 +18,6 @@ uv run python run.py      # out/results.json と out/audio/*.mp3（初回はモ�
 uv run python report.py   # out/report.html
 ```
 
+1 曲の採点は `uv run python score_piece.py <slug>`、区間の候補づくりは `uv run python variations.py <slug> <最初の小節> <小節数> <候補数>`（`out/variations-*.json` と `out/audio/` に出力）。
+
 `ffmpeg` が必要。題材の区間と候補の数は `run.py` の先頭の定数で変える。
