@@ -1,12 +1,28 @@
 import * as Tone from "tone";
-import type { Piece } from "../pieces/types";
+import type { ChipPiece, Piece } from "../pieces/types";
 import { chipKit, renderChip } from "./chip";
 import { danmaku } from "./danmaku";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
+import type { Kit } from "./score";
 
-export function mount(piece: Piece, els: { canvas: HTMLCanvasElement; button: HTMLButtonElement; status: HTMLElement }) {
-  const kit = piece.kind === "chip" ? chipKit(piece.bpm, piece.timbre) : pianoKit(piece.bpm);
+export function mount(
+  piece: Piece,
+  els: { canvas: HTMLCanvasElement; button: HTMLButtonElement; status: HTMLElement; timbre?: HTMLSelectElement },
+) {
+  const chipKits = new Map<string, Kit>();
+  const chip = (bpm: number, t: NonNullable<ChipPiece["timbre"]>) => {
+    if (!chipKits.has(t)) chipKits.set(t, chipKit(bpm, t));
+    return chipKits.get(t)!;
+  };
+  let kit = piece.kind === "chip" ? chip(piece.bpm, piece.timbre ?? "square") : pianoKit(piece.bpm);
+  if (piece.kind === "chip" && els.timbre) {
+    const select = els.timbre;
+    select.addEventListener("change", () => {
+      kit.releaseAll();
+      kit = chip(piece.bpm, select.value as NonNullable<ChipPiece["timbre"]>);
+    });
+  }
   const visual =
     piece.kind === "piano" ? sparks(els.canvas) : piece.visual === "danmaku" ? danmaku(els.canvas) : pixels(els.canvas);
   const transport = Tone.getTransport();

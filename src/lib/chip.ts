@@ -25,6 +25,8 @@ const TIMBRES = {
   pluck: { lead: { type: "square" }, harm: { type: "pulse", width: 0.125 }, arp: { type: "pulse", width: 0.25 }, leadVol: -15, decay: 0.2, sustain: 0.25, vibrato: 0, echo: 0.15 },
 } as const;
 
+export const timbres = Object.keys(TIMBRES) as (keyof typeof TIMBRES)[];
+
 export function renderChip(piece: ChipPiece) {
   const beat = 60 / piece.bpm;
   const six = beat / 4;

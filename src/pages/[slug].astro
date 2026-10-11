@@ -15,18 +15,26 @@ const { piece } = Astro.props;
     <h1>{piece.title}</h1>
     <p id="status">{piece.description}</p>
     <button id="play">PLAY</button>
+    {import.meta.env.DEV && piece.kind === "chip" && <select id="timbre" data-timbre={piece.timbre ?? "square"}></select>}
   </div>
 </Base>
 
 <script>
+  import { timbres } from "../lib/chip";
   import { mount } from "../lib/player";
   import { pieces } from "../pieces";
 
   const ui = document.querySelector<HTMLElement>(".ui")!;
+  const timbre = document.querySelector<HTMLSelectElement>("#timbre") ?? undefined;
+  if (timbre) {
+    for (const t of timbres) timbre.add(new Option(t, t));
+    timbre.value = timbre.dataset.timbre!;
+  }
   mount(pieces.find((p) => p.slug === ui.dataset.slug)!, {
     canvas: document.querySelector("canvas")!,
     button: document.querySelector("button")!,
     status: document.querySelector("#status")!,
+    timbre,
   });
 </script>
 
@@ -39,4 +47,5 @@ const { piece } = Astro.props;
   p { opacity: .6; font-size: .85rem; margin: 0 0 1.4rem; }
   button { background: rgba(13, 15, 20, .75); color: inherit; border: 1px solid #d8dbe2; padding: .6rem 2.2rem; font: inherit; letter-spacing: .2em; cursor: pointer; }
   button:disabled { opacity: .4; cursor: default; }
+  select { display: block; margin: .8rem auto 0; background: rgba(13, 15, 20, .75); color: inherit; border: 1px solid #d8dbe2; padding: .3rem .6rem; font: inherit; font-size: .8rem; letter-spacing: .1em; }
 </style>
