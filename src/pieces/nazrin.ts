@@ -79,7 +79,7 @@ const section = (lines: Line[], flags: (i: number) => Flags): LofiBar[] =>
 const groove = { beat: true, bass: true };
 
 const bars: LofiBar[] = [
-  // the theme's head and its run back to E-flat minor, on keys and the record only
+  // the theme's head and its run back to E-flat minor, on keys only
   ...section([THEME[0], THEME[1], THEME[6], THEME[7]], (i) => ({ open: 0.4 + i * 0.08 })),
   ...section(THEME, (i) => ({ ...groove, crash: i === 0 })),
   ...section(RIFF, (i) => ({ ...groove, open: 0.85, crash: i === 0 })),

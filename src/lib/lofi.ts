@@ -64,21 +64,9 @@ export function renderLofi(piece: LofiPiece) {
   });
 
   const end = piece.bars.length * barLen;
-  add(0, "vinyl", [], end, 1);
   return { events, end };
 }
 
-// sparse clicks of random height, looped under the whole piece
-function crackle(seconds: number) {
-  const rate = Tone.getContext().sampleRate;
-  const data = new Float32Array(Math.floor(seconds * rate));
-  for (let k = 0; k < seconds * 40; k++) {
-    const at = Math.floor(Math.random() * data.length);
-    const amp = (Math.random() < 0.08 ? 1 : 0.15 + Math.random() * 0.35) * (Math.random() < 0.5 ? -1 : 1);
-    for (let j = 0; j < 40 && at + j < data.length; j++) data[at + j] += amp * Math.exp(-j / 6);
-  }
-  return Tone.ToneAudioBuffer.fromArray(data);
-}
 
 export function lofiKit(bpm: number): Kit {
   const beat = 60 / bpm;
@@ -135,13 +123,6 @@ export function lofiKit(bpm: number): Kit {
   const crash = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.02, decay: 2.5, sustain: 0 }, volume: -28 });
   crash.chain(new Tone.Filter(3500, "highpass"), reverb);
 
-  // the record: crackle and a little hiss, outside the tape so it never wobbles
-  const vinyl = new Tone.Gain(1).connect(out);
-  const pops = new Tone.Player({ url: crackle(3.7), loop: true, volume: -14 });
-  pops.chain(new Tone.Filter(1200, "highpass"), new Tone.Filter(6000, "lowpass"), vinyl);
-  const hiss = new Tone.Noise({ type: "pink", volume: -40 });
-  hiss.chain(new Tone.Filter(1500, "highpass"), vinyl);
-
   return {
     play(e: NoteEvent, time: number) {
       if (e.voice === "open") {
@@ -161,17 +142,12 @@ export function lofiKit(bpm: number): Kit {
         hat.triggerAttackRelease(e.dur, time, e.vel);
       } else if (e.voice === "crash") {
         crash.triggerAttackRelease(e.dur, time, e.vel);
-      } else if (e.voice === "vinyl") {
-        pops.start(time).stop(time + e.dur);
-        hiss.start(time).stop(time + e.dur);
       }
     },
     releaseAll() {
       keys.releaseAll();
       lead.releaseAll();
       bass.releaseAll();
-      pops.stop();
-      hiss.stop();
     },
   };
 }
