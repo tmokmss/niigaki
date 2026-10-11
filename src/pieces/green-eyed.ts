@@ -11,11 +11,11 @@ const B = ["B3", "D#4", "F#4"];
 const D = ["D4", "F#4", "A4"];
 const Am = ["A3", "C4", "E4"];
 
-type Note = [string, number];
-type Line = [string[], string];
+export type Note = [string, number];
+export type Line = [string[], string];
 
 // "E4 G4:2 -:4 ~:8" -> [note, sixteenths]; the length defaults to one sixteenth
-const m = (s: string): Note[] =>
+export const m = (s: string): Note[] =>
   s.split(" ").map((x) => {
     const [note, n] = x.split(":");
     return [note, Number(n ?? 1)];
@@ -23,7 +23,7 @@ const m = (s: string): Note[] =>
 
 // 3/4 bar -> 4/4 bar: the three beats become 3+3+2 (dotted quarter, dotted quarter, quarter)
 const stretch = (x: number) => (x <= 4 ? x * 1.5 : x <= 8 ? 6 + (x - 4) * 1.5 : 12 + (x - 8));
-const tresillo = (s: string): Note[] => {
+export const tresillo = (s: string): Note[] => {
   let x = 0;
   return m(s).map(([note, n]) => {
     const from = stretch(x);
@@ -33,7 +33,7 @@ const tresillo = (s: string): Note[] => {
 };
 
 // a twelve-sixteenth run plus a rising chord flourish fills a 4/4 bar
-const flourish = (c: string[], s: string): Note[] => [
+export const flourish = (c: string[], s: string): Note[] => [
   ...m(s),
   [transpose(c[0], 12), 1],
   [transpose(c[1], 12), 1],
@@ -41,7 +41,7 @@ const flourish = (c: string[], s: string): Note[] => [
   [transpose(c[0], 24), 1],
 ];
 
-const THEME: Line[] = [
+export const THEME: Line[] = [
   [Em, "B4:12"],
   [Em, "B4:4 F#5:4 G5:4"],
   [A, "A5:12"],
@@ -52,7 +52,7 @@ const THEME: Line[] = [
   [Cdim, "B5:8 E6:4"],
 ];
 
-const THEME_HIGH: Line[] = [
+export const THEME_HIGH: Line[] = [
   [C, "E6:8 C6:2 D6:2"],
   [C, "E6:4 F#6:4 G6:4"],
   [G, "G6:8 B5:2 F#6:2"],
@@ -63,7 +63,7 @@ const THEME_HIGH: Line[] = [
   [B, "D#6:2 B5:2 A5:2 G5:2 F#5:2 D#5:2"],
 ];
 
-const THEME_END: Line[] = [
+export const THEME_END: Line[] = [
   [C, "E6:8 B4:2 E5:2"],
   [C, "F#5:4 G5:4 B5:4"],
   [Em, "E6:8 B4:4"],
@@ -74,7 +74,7 @@ const THEME_END: Line[] = [
   [B, "F#4:4 D#4:4 B3:4"],
 ];
 
-const CHORDS: Line[] = [
+export const CHORDS: Line[] = [
   [C, "E5:12"],
   [C, "D5:4 A4:4 G4:4"],
   [D, "F#4:4 D4:4 A3:4"],
@@ -93,7 +93,7 @@ const CHORDS: Line[] = [
   [Em, "-:4 E5 B4 A4 G4 E4 B3 A3 G3"],
 ];
 
-const RUNS: Line[] = [
+export const RUNS: Line[] = [
   [Em, "E4 G4 A4 G4 B4 E5 G5 A5 B5 G5 B5 G5"],
   [Em, "E6 G5 B5 G5 E5 G5 A5 G5 E5 B4 A4 G4"],
   [B, "D#4 F#4 A4 B4 D#5 B4 F#5 D#5 A5 B5 E5 D#5"],
@@ -124,7 +124,7 @@ const BUILD: Line[] = [
 ];
 
 // long notes struck again: step 3 gives a syncopated 3+3+...+2+2, step 2 straight eighths
-const chop = (step: number) => (ns: Note[]): Note[] =>
+export const chop = (step: number) => (ns: Note[]): Note[] =>
   ns.flatMap(([p, n]) => {
     if (p === "~" || p === "-" || n < 2 * step) return [[p, n]];
     const out: Note[] = [];
@@ -137,7 +137,7 @@ const chop = (step: number) => (ns: Note[]): Note[] =>
   });
 
 // every other note jumps an octave, up from below C6 and down from above
-const leap = (ns: Note[]): Note[] => {
+export const leap = (ns: Note[]): Note[] => {
   let i = 0;
   return ns.map(([p, n]) =>
     p === "~" || p === "-" || i++ % 2 === 0 ? [p, n] : [transpose(p, midi(p) < midi("C6") ? 12 : -12), n],
@@ -152,7 +152,7 @@ const next = (c: string[], p: string, dir: number) => {
 };
 
 // a long note becomes sixteenths running up and back through the chord from it
-const arpeggio = (c: string[]) => (ns: Note[]): Note[] =>
+export const arpeggio = (c: string[]) => (ns: Note[]): Note[] =>
   ns.flatMap(([p, n]) => {
     if (p === "~" || p === "-" || n < 6) return [[p, n]];
     const dir = midi(p) < midi("C6") ? 1 : -1;
