@@ -46,6 +46,11 @@ export function danmaku(canvas: HTMLCanvasElement, hues: number[]) {
   };
 
   const draw = (now: number) => {
+    // 60fps is enough for the background, so high refresh rate displays skip frames
+    if (now - last < 12) {
+      requestAnimationFrame(draw);
+      return;
+    }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     clock += dt;
