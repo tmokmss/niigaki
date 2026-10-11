@@ -32,6 +32,13 @@ const swing = (s: string): [string, number][] => {
   });
 };
 
+// "G5:4 G5:2 -:6" already in triplet steps (24 per bar)
+const steps = (s: string): [string, number][] =>
+  s.split(" ").map((tok) => {
+    const [note, n] = tok.split(":");
+    return [note, Number(n ?? 1)];
+  });
+
 // the soldier's march in G minor: the hook and its three tails
 const tail = ["C6 Bb5 A5:2", "F5:2 G5:2", "C6 D6 Eb6 F6", "C6 Bb5 A5:2"];
 const hook = (end: string) => `G5:2 D6:2 C6:2 D6:2 A5 -:1 Bb5 D6 ${end}`;
@@ -65,12 +72,16 @@ const CLOCK: Line[] = [
   [Cm11, D7b13, "-:6 Eb6:2 F6 -:1 Gb6 -:1 F6 -:1 Eb6 -:1"],
 ];
 
-// the hook again, pushed late, thinned and run up through the chord
+// the hook again, its notes restruck on swung eighths (in triplet steps; picked from the candidates the scoring lab compared)
+const CHOP: Line[] = [
+  [Gm9, Gm9, "G5:2 G5 -:3 D6:4 D6:2 C6:3 D6:3 A5:6"],
+  [F69, F69, "G5:2 G5 -:3 D6:4 D6:2 F5:6 G5:6"],
+  [Ebmaj9, Ebmaj9, "G5:2 G5 -:3 D6:4 D6:2 Eb6:4 Eb6:2 F6:6"],
+  [FoverA, FoverA, "G6:4 G6:2 F6:4 F6:2 D6:6 C6:6"],
+];
+
+// then pushed late, thinned and run up through the chord
 const HOOK2: Line[] = [
-  [Gm9, Gm9, "-:2 G5:2 D6:2 C6:2 D6:2 Bb5 D6 C6 Bb5 A5:2"],
-  [F69, F69, "G5:2 -:2 C6:2 D6:2 A5:4 F5:2 G5:2"],
-  [Ebmaj9, Ebmaj9, "-:2 D6:2 C6:2 D6:2 A5 -:1 Bb5 D6 C6 D6 Eb6 F6"],
-  [FoverA, FoverA, "G6:4 F6:2 D6:2 C6:4 A5:4"],
   [Gm9, Gm9, "G5:2 D6:2 -:4 A5:2 Bb5 D6 C6:2 A5:2"],
   [F69, F69, "G5:2 D6:2 C6:2 -:2 A5:2 G5:2 F5:2 G5:2"],
   [Ebmaj9, Ebmaj9, "G5 Bb5 D6 F6 Eb6:2 D6:2 Bb5:2 G5:2 C6 D6 Eb6 F6"],
@@ -86,8 +97,8 @@ const OUTRO: Line[] = [
 ];
 
 type Flags = Omit<LofiBar, "c" | "c2" | "m">;
-const section = (lines: Line[], flags: (i: number) => Flags): LofiBar[] =>
-  lines.map(([c, c2, s], i) => ({ c, ...(c2 === c ? {} : { c2 }), m: swing(s), ...flags(i) }));
+const section = (lines: Line[], flags: (i: number) => Flags, parse = swing): LofiBar[] =>
+  lines.map(([c, c2, s], i) => ({ c, ...(c2 === c ? {} : { c2 }), m: parse(s), ...flags(i) }));
 
 const groove = { beat: true, bass: true };
 
@@ -96,7 +107,8 @@ const bars: LofiBar[] = [
   ...section([...HOOK, ...HOOK.slice(0, 3), ANSWER], (i) => ({ ...groove, crash: i === 0 })),
   ...section(THEME, (i) => ({ ...groove, crash: i === 0 })),
   ...section(CLOCK, (i) => ({ bass: true, open: 0.3, crash: i === 0 })),
-  ...section(HOOK2, (i) => ({ ...groove, crash: i === 0 })),
+  ...section(CHOP, (i) => ({ ...groove, crash: i === 0 }), steps),
+  ...section(HOOK2, () => groove),
   ...section(OUTRO, (i) => ({ beat: i < 2, bass: i < 3, open: 0.75 - i * 0.12, crash: i === 0 })),
 ];
 

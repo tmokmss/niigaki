@@ -1,94 +1,103 @@
-"""New lead lines for some bars of a piece, kept per (pitch surprise, rhythm surprise) cell.
+"""Scores candidate lead lines for some bars of a piece and keeps the best per (pitch surprise, rhythm surprise) cell.
 
-usage: uv run python variations.py <slug> <first bar, 1-based> <bars> <candidates>
+The composer writes the candidates; the model only scores them.
+
+usage: uv run python variations.py <slug> <first bar, 1-based> <candidates.json>
+candidates.json: {"<id>": ["<bar 1 melody>", "<bar 2 melody>", ...]} in the piece's grid steps
+(24 per bar for lo-fi, sixteenths otherwise), e.g. "G5:6 -:3 D6:3 C6:12"; "~" holds the previous note
 writes out/variations-<slug>-<first bar>.json and out/audio/<slug>-<first bar>-<id>.mp3 (the 4 bars before and the new bars)
 """
 
 import json
 import sys
-
-import torch
+from pathlib import Path
 
 import amt
 import synth
-from explore import elites, quantize, to_m
-from music import OUT, check, coherence, load_pieces
+from explore import elites, to_m
+from music import NAMES, OUT, check, coherence, load_pieces
 
-TOP_P = [0.9, 0.95, 0.98, 1.0]
-TEMPERATURE = [1.0, 1.3, 1.6]
 LEAD_IN = 4
 
 
-def main(slug, first, bars, count):
+def midi(note):
+    return NAMES.index(note[0]) + {"#": 1, "b": -1, "": 0}[note[1:-1]] + (int(note[-1]) + 1) * 12
+
+
+def parse(lines, first, p, per_beat):
+    """Melody strings, one per bar from `first`, into notes placed against the piece's chords."""
+    per_bar = p["beats"] * per_beat
+    notes = []
+    for b, s in enumerate(lines):
+        bar = first + b
+        t0 = next(c["t"] for c in p["chords"] if c["bar"] == bar and c["beat"] == 0)
+        sec = 60 / p["bpm"] / per_beat
+        x = 0
+        for tok in s.split():
+            note, n = (tok.split(":") + ["1"])[:2]
+            n = int(n)
+            if note == "~":
+                notes[-1]["beats"] += n / per_beat
+                notes[-1]["dur"] += n * sec
+            elif note != "-":
+                notes.append({"bar": bar, "beat": x / per_beat, "beats": n / per_beat, "t": t0 + x * sec, "dur": n * sec, "pitch": midi(note)})
+            x += n
+        if x != per_bar:
+            raise ValueError(f"bar {bar + 1} of a candidate has {x} steps, not {per_bar}: {s}")
+    return notes
+
+
+def main(slug, first, path):
     p = next(x for x in load_pieces() if x["slug"] == slug)
     per_beat = 6 if p["kind"] == "lofi" else 4
+    written = json.loads(Path(path).read_text())
+    bars = len(next(iter(written.values())))
     first -= 1
     bar = p["beats"] * 60 / p["bpm"]
-    start, end = first * bar, (first + bars) * bar
+    end = (first + bars) * bar
     before = [n for n in p["lead"] if n["bar"] < first]
     after = [n for n in p["lead"] if n["bar"] >= first + bars]
     span = [c for c in p["chords"] if first <= c["bar"] < first + bars]
     model = amt.load()
 
-    def evaluate(line):
+    lines = {"current": [n for n in p["lead"] if first <= n["bar"] < first + bars]}
+    lines |= {cid: parse(ls, first, p, per_beat) for cid, ls in written.items()}
+    cands = []
+    for cid, line in lines.items():
         lead = before + line + after
         s = amt.surprise(model, lead, p["chords"])
         idx = [i for i, n in enumerate(lead) if first <= n["bar"] < first + bars]
-        r = check({**p, "lead": lead})
-        reasons = [a["reason"] for a in r["accidents"] if first < a["bar"] <= first + bars]
+        reasons = [a["reason"] for a in check({**p, "lead": lead})["accidents"] if first < a["bar"] <= first + bars]
         reasons += ["メロディが無い小節"] * sum(1 for b in range(first, first + bars) if not any(n["bar"] == b for n in line))
         mean = lambda k: sum(s[i][k] for i in idx) / len(idx) if idx else 0.0
-        return {
-            "pitch": mean("pitch"),
-            "rhythm": mean("rhythm"),
-            "accidents": len(reasons),
-            "reasons": sorted(set(reasons)),
-            "quality": coherence(line, span) if line else 0.0,
-            "m": to_m([{**n, "bar": n["bar"] - first} for n in line], bars, p["beats"], per_beat),
-        }
+        cands.append(
+            {
+                "id": cid,
+                "pitch": mean("pitch"),
+                "rhythm": mean("rhythm"),
+                "accidents": len(reasons),
+                "reasons": sorted(set(reasons)),
+                "quality": coherence(line, span) if line else 0.0,
+                "m": to_m([{**n, "bar": n["bar"] - first} for n in line], bars, p["beats"], per_beat),
+            }
+        )
 
-    lines = {"current": [n for n in p["lead"] if first <= n["bar"] < first + bars]}
-    cands = [{"id": "current", **evaluate(lines["current"])}]
-    for i in range(count):
-        torch.manual_seed(i)
-        # after a repeated hook the model just repeats it again, so two of every three candidates sample hotter
-        temperature = TEMPERATURE[i % len(TEMPERATURE)]
-        top_p = TOP_P[i // len(TEMPERATURE) % len(TOP_P)]
-        raw = amt.infill(model, before, p["chords"], start, end, top_p, temperature)
-        line = quantize([(max(0.0, t - start), d, x) for t, d, x in raw], p["bpm"], p["beats"], end - start, per_beat)
-        line = [{**n, "bar": n["bar"] + first, "t": n["t"] + start} for n in line]
-        cid = f"c{i:03d}"
-        lines[cid] = line
-        cands.append({"id": cid, "seed": i, "top_p": top_p, "temperature": temperature, **evaluate(line)})
-        print(cid, cands[-1]["accidents"], round(cands[-1]["pitch"], 2), round(cands[-1]["rhythm"], 2), flush=True)
-
-    cells, xs, ys = elites([c for c in cands if "seed" in c])
-    keep = {"current", *(c["id"] for c in cells.values())}
+    cells, xs, ys = elites(cands)
     t0 = (first - LEAD_IN) * bar
-    listen = lambda ns: [{**n, "t": n["t"] - t0} for n in ns if n["t"] >= t0 - 1e-6]
     chords = [{**c, "t": c["t"] - t0} for c in p["chords"] if t0 - 1e-6 <= c["t"] < end - 1e-6]
     (OUT / "audio").mkdir(exist_ok=True)
-    for cid in keep:
-        notes = listen([n for n in before if n["t"] >= t0 - 1e-6] + lines[cid])
+    for cid, line in lines.items():
+        notes = [{**n, "t": n["t"] - t0} for n in before + line if n["t"] >= t0 - 1e-6]
         synth.save_mp3(synth.render(notes, chords, p["bpm"], end - t0), OUT / "audio" / f"{slug}-{first + 1}-{cid}.mp3")
-    result = {
-        "slug": slug,
-        "title": p["title"],
-        "bars": [first + 1, first + bars],
-        "candidates": cands,
-        "x_edges": xs,
-        "y_edges": ys,
-        "elites": {f"{x},{y}": c["id"] for (x, y), c in cells.items()},
-    }
+    best = {c["id"] for c in cells.values()}
+    result = {"slug": slug, "title": p["title"], "bars": [first + 1, first + bars], "candidates": cands, "x_edges": xs, "y_edges": ys,
+              "elites": {f"{x},{y}": c["id"] for (x, y), c in cells.items()}}
     (OUT / f"variations-{slug}-{first + 1}.json").write_text(json.dumps(result, ensure_ascii=False, indent=1))
-    print("elites:")
-    for (x, y), c in sorted(cells.items()):
-        print(f"  pitch {x} rhythm {y}: {c['id']} pitch {c['pitch']:.2f} rhythm {c['rhythm']:.2f} quality {c['quality']:.2f}")
-        for line in c["m"]:
-            print("    ", line)
-    cur = cands[0]
-    print(f"current: pitch {cur['pitch']:.2f} rhythm {cur['rhythm']:.2f} quality {cur['quality']:.2f} accidents {cur['accidents']}")
+    print(f"{'id':<12} {'cell':<5} pitch rhythm quality  accidents")
+    for c in sorted(cands, key=lambda c: c["pitch"]):
+        cell = ",".join(map(str, c.get("cell", ()))) if c["id"] in best else ""
+        print(f"{c['id']:<12} {cell:<5} {c['pitch']:5.2f} {c['rhythm']:6.2f} {c['quality']:7.2f}  {', '.join(c['reasons']) or '-'}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
+    main(sys.argv[1], int(sys.argv[2]), sys.argv[3])
