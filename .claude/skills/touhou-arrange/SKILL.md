@@ -24,7 +24,7 @@ description: niigaki リポジトリで、東方 Project の原曲をチップ�
 ## 3. 書き起こす
 
 - `pdftoppm -r 300 -png <pdf> <dir>/p` でページを画像にする
-- `bash ~/.claude/skills/touhou-arrange/scripts/crop.sh <dir> <page> <y0> <y1> <x0> <x1> <name>`（座標は 100dpi 換算）で 1 段を左右半分ずつ切り出して読む。16 分音符の段は右手だけを上に余白を取り、2 小節ずつ切る
+- `bash .claude/skills/touhou-arrange/scripts/crop.sh <dir> <page> <y0> <y1> <x0> <x1> <name>`（座標は 100dpi 換算）で 1 段を左右半分ずつ切り出して読む。16 分音符の段は右手だけを上に余白を取り、2 小節ずつ切る
 - 読む前に、その画像の五線の y 座標を決めてから音の高さを数える（ト音記号は下から E4 G4 B4 D5 F5、ヘ音記号は G2 B2 D3 F3 A3）
 - 調号・臨時記号（小節の中で持続）・`8va` の範囲・タイを見落とさない
 - 右手は一番上の音をメロディに、左手は低音と和音の音から小節ごとの和音を決める
@@ -60,7 +60,7 @@ description: niigaki リポジトリで、東方 Project の原曲をチップ�
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx ~/.claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
 - ブラウザのログ（`.playwright-cli/`）を消してからコミットし、push して main への PR を作る
 

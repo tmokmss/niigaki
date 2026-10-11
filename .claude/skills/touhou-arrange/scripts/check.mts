@@ -1,4 +1,4 @@
-// usage (from the worktree root): npx tsx ~/.claude/skills/touhou-arrange/scripts/check.mts <slug>
+// usage (from the worktree root): npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
