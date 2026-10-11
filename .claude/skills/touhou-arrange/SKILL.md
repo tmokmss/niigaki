@@ -13,7 +13,12 @@ description: niigaki リポジトリで、東方 Project の原曲をチップ�
 ## 2. 楽譜を探す
 
 - 「<曲名> 楽譜」「<英語名> MIDI」で探す。MIDI の配布はログイン必須が多い
-- 無料 PDF は ALFetite の楽譜置き場（`https://alfetite.com/sheet-music/touhou`）にあることが多い。サイトの FAQ で利用条件を確かめる
+- 無料の楽譜は次の順に探す。どこも収録曲が限られるので、無ければ次へ進む。それぞれのサイトで利用条件を確かめ、出典を曲データのコメントに書く
+  - ALFetite（`https://alfetite.com/sheet-music/touhou`）：原曲に忠実なピアノ譜の PDF
+  - Touhou Piano Library（`https://bloak.github.io/touhou_piano_library/`）：作品ごとのピアノ譜の PDF。画像だけの低解像度の PDF がある
+  - 東方ピアノEasyモード（`https://easypianoscore.jp/`）：簡単ピアノ譜の PDF と MIDI。作品ごとの一覧から曲を選ぶ。音が省略されているので、主旋律と和音を読み、MIDI と突き合わせる。参考にしたことを明記すれば改変・公開してよい（`https://easypianoscore.jp/kenri.html`）
+  - EveryonePiano（`https://www.everyonepiano.com/`）：PDF は無く、ページの譜面画像を保存して読む
+- MuseScore・BOOTH の譜面は、ログイン必須か有料のことが多い
 - PDF は空のディレクトリに保存する
 
 ## 3. 書き起こす
