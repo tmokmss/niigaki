@@ -24,7 +24,7 @@ export function mount(
     });
   }
   const visual =
-    piece.kind === "piano" ? sparks(els.canvas) : piece.visual === "danmaku" ? danmaku(els.canvas) : pixels(els.canvas);
+    piece.kind === "piano" ? sparks(els.canvas) : piece.visual === "danmaku" ? danmaku(els.canvas, piece.hues ?? [140, 170, 110, 190]) : pixels(els.canvas);
   const transport = Tone.getTransport();
   const setVolume = () => {
     Tone.getDestination().volume.value = Tone.gainToDb(Number(els.volume.value) / 100);

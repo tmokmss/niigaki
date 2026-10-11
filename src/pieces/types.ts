@@ -47,6 +47,8 @@ export type ChipPiece = {
   bassline: "octave" | "fifth" | "pulse";
   timbre?: "square" | "reed" | "bright" | "flute" | "pluck";
   visual?: "danmaku";
+  // danmaku colour palette, advanced on each crash
+  hues?: number[];
   bars: ChipBar[];
 };
 

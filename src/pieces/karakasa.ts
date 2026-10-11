@@ -145,5 +145,6 @@ export const karakasa: ChipPiece = {
   bassline: "octave",
   timbre: "pluck",
   visual: "danmaku",
+  hues: [280, 310, 220, 330],
   bars,
 };

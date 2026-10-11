@@ -212,5 +212,6 @@ export const kappa: ChipPiece = {
   bassline: "octave",
   timbre: "bright",
   visual: "danmaku",
+  hues: [190, 210, 170, 230],
   bars,
 };

@@ -179,5 +179,6 @@ export const voile: ChipPiece = {
   bassline: "octave",
   timbre: "flute",
   visual: "danmaku",
+  hues: [275, 300, 40, 255],
   bars,
 };

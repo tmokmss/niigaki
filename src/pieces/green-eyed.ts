@@ -227,5 +227,6 @@ export const greenEyed: ChipPiece = {
   bassline: "octave",
   timbre: "reed",
   visual: "danmaku",
+  hues: [140, 170, 110, 190],
   bars,
 };

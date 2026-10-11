@@ -1,17 +1,25 @@
+import * as Tone from "tone";
 import { fitCanvas, midi, type NoteEvent } from "./score";
 
 type Bullet = { x: number; y: number; vx: number; vy: number; r: number; hue: number };
 
 const MAX_BULLETS = 2500;
-const HUES = [140, 170, 110, 190];
 
-export function danmaku(canvas: HTMLCanvasElement) {
+const level = (db: number) => Math.min(1, Math.max(0, (db + 90) / 70));
+
+export function danmaku(canvas: HTMLCanvasElement, hues: number[]) {
   const ctx = fitCanvas(canvas);
   const dpr = devicePixelRatio;
+  const wave = new Tone.Waveform(256);
+  const fft = new Tone.FFT(64);
+  Tone.getDestination().connect(wave);
+  Tone.getDestination().connect(fft);
+  // the background is a feedback loop at half resolution: each frame redraws the previous one zoomed and rotated
+  let [front, back] = [0, 1].map(() => document.createElement("canvas").getContext("2d")!);
   const bullets: Bullet[] = [];
   const stars = Array.from({ length: 120 }, () => ({ x: Math.random(), y: Math.random(), s: 0.2 + Math.random() * 0.8 }));
   let palette = 0;
-  let hue = HUES[0];
+  let hue = hues[0];
   let pulse = 0;
   let lastBass = -1;
   let ringSpin = 0;
@@ -44,8 +52,66 @@ export function danmaku(canvas: HTMLCanvasElement) {
     const W = canvas.width;
     const H = canvas.height;
 
+    const b = boss();
+    const spectrum = fft.getValue();
+    const bass = (level(spectrum[1]) + level(spectrum[2]) + level(spectrum[3])) / 3;
+    const loud = spectrum.reduce((sum, db) => sum + level(db), 0) / spectrum.length;
+
+    const bw = Math.ceil(W / 2);
+    const bh = Math.ceil(H / 2);
+    for (const c of [front, back]) {
+      if (c.canvas.width !== bw || c.canvas.height !== bh) {
+        c.canvas.width = bw;
+        c.canvas.height = bh;
+      }
+    }
+    const cx = b.x / 2;
+    const cy = b.y / 2;
+    back.globalCompositeOperation = "source-over";
+    back.globalAlpha = 1;
+    back.fillStyle = `hsl(${hue} 40% 5%)`;
+    back.fillRect(0, 0, bw, bh);
+    back.save();
+    back.translate(cx, cy);
+    back.rotate((0.15 + loud * 0.6 + pulse * 0.3) * dt);
+    const zoom = 1 + (0.4 + bass * 1.6 + pulse) * dt;
+    back.scale(zoom, zoom);
+    back.translate(-cx, -cy);
+    back.globalAlpha = 0.94;
+    back.drawImage(front.canvas, 0, 0);
+    back.restore();
+
+    back.globalCompositeOperation = "lighter";
+    const samples = wave.getValue();
+    const r0 = Math.min(bw, bh) * 0.22;
+    back.lineWidth = 1.5 * dpr;
+    back.strokeStyle = `hsla(${hue + 20} 90% 60% / 0.8)`;
+    back.beginPath();
+    for (let i = 0; i <= samples.length; i++) {
+      const a = (i / samples.length) * Math.PI * 2 + clock * 0.2;
+      const r = r0 * (1 + samples[i % samples.length] * 1.2);
+      if (i) back.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      else back.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    back.stroke();
+    back.lineWidth = 2 * dpr;
+    for (let i = 0; i < spectrum.length; i++) {
+      const v = level(spectrum[i]);
+      if (!v) continue;
+      back.strokeStyle = `hsla(${hue - 40 + (i / spectrum.length) * 120} 90% 55% / ${v * 0.7})`;
+      for (const side of [1, -1]) {
+        const a = -Math.PI / 2 + side * (i + 0.5) * (Math.PI / spectrum.length) - clock * 0.1;
+        back.beginPath();
+        back.moveTo(cx + Math.cos(a) * r0 * 1.15, cy + Math.sin(a) * r0 * 1.15);
+        back.lineTo(cx + Math.cos(a) * r0 * (1.15 + v * 0.9), cy + Math.sin(a) * r0 * (1.15 + v * 0.9));
+        back.stroke();
+      }
+    }
+    [front, back] = [back, front];
+
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = `hsl(${hue} 40% 5%)`;
+    ctx.drawImage(front.canvas, 0, 0, W, H);
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
     ctx.fillRect(0, 0, W, H);
 
     ctx.fillStyle = `hsl(${hue} 50% 70%)`;
@@ -60,7 +126,6 @@ export function danmaku(canvas: HTMLCanvasElement) {
     }
     ctx.globalAlpha = 1;
 
-    const b = boss();
     const R = Math.min(W, H) * 0.13 * (1 + pulse * 0.08);
     ctx.lineWidth = 1.5 * dpr;
     ctx.strokeStyle = `hsla(${hue} 80% 60% / ${0.25 + pulse * 0.3})`;
@@ -123,7 +188,7 @@ export function danmaku(canvas: HTMLCanvasElement) {
       for (let i = -2; i <= 2; i++) shoot(aim + i * 0.12, 260, 4.5, 355);
     }
     if (e.voice === "crash") {
-      hue = HUES[++palette % HUES.length];
+      hue = hues[++palette % hues.length];
       ring(48, 120, 5, hue, 0);
       ring(48, 180, 4, hue + 30, Math.PI / 48);
     }
