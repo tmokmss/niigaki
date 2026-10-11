@@ -83,16 +83,19 @@ export function bossaKit(bpm: number): Kit {
     const peak = ch.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
     return buf.slice(Math.max(0, ch.findIndex((x) => Math.abs(x) >= peak / 10) / buf.sampleRate - 0.005));
   };
-  const sampler = (dir: string, notes: Tone.Unit.Note[], release: number, volume: number) => {
-    const s = new Tone.Sampler({ release, volume }).connect(reverb);
+  const sampler = (dir: string, notes: Tone.Unit.Note[], release: number, volume: number, to: Tone.InputNode) => {
+    const s = new Tone.Sampler({ release, volume }).connect(to);
     for (const n of notes) {
       const url = `https://nbrosowsky.github.io/tonejs-instruments/samples/${dir}/${n.replace("#", "s")}.mp3`;
       new Tone.ToneAudioBuffer(url, (buf) => s.add(n, trim(buf)));
     }
     return s;
   };
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -11);
-  const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.3, -11);
+  // the dry saxophone sounds thin: soften its top and give it a longer, deeper hall of its own on top of the room
+  const saxRoom = new Tone.Filter(3200, "lowpass");
+  saxRoom.chain(new Tone.Reverb({ decay: 3.2, wet: 0.45 }), reverb);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -11, reverb);
+  const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.6, -11, saxRoom);
 
   const bass = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: "triangle" },
