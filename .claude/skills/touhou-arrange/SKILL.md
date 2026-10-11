@@ -1,6 +1,6 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）か Future Bass にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
@@ -96,10 +96,21 @@ Future Bass を頼まれたら、5 章の構成の考え方（イントロで名
 - 原曲に繰り返し記号があれば、その戻り先へつながる和音（1 番かっこ）で曲を終えるとループが自然につながる
 - 音量は、ブラウザで `Tone.Offline` に通して小節ごとの RMS とピークを測って合わせる（ドロップのピークを 0.9 前後に）
 
+## 5c. Lo-Fi Hip Hop で組み直す
+
+Lo-Fi を頼まれたら `kind: "lofi"`（`src/lib/lofi.ts`）で書く。例は `src/pieces/nazrin.ts`。ドロップは作らず、同じ温度で流す。
+
+- BPM 75〜90。構成：イントロ 4（ビート無し。主題の頭を原曲の和音で）→ ループ A 8（主旋律）→ ループ B 6〜8（原曲の別の旋律）→ ブレイク 4（`beat` を抜き `open: 0.3`）→ ループ A' 8（旋律を遅らせる・抜く・分散和音にする）→ アウトロ 4（属和音で終える）
+- `m` の長さは 1 小節 24 ステップ（16 分の 3 連）。3 拍子の原曲は 2 小節を 1 小節に入れ、16 分音符の数をそのまま書く（4 分音符が 4 分 3 連になり、跳ねたビートに乗る）。`c` に 1 小節目、`c2` に 2 小節目の和音を書く
+- 和音は 7th・9th・11th を足して 4〜5 音、根音を先頭に A3〜G4 に置く。原曲の和音をジャズ寄りに置き換え（m → m9・m11、長三和音 → maj9・6/9、属和音 → 7(b13)・dim7）、旋律と半音でぶつかる音は外す
+- `beat` はキック（1・2 拍裏・3 拍裏）、遅らせたスネア（2・4 拍）、跳ねたハット。`bass` は丸い三角波。`crash` は区間の頭に置き、弾幕の色を変える
+- レコードのノイズ・テープの揺れ・ローパスは音源が常にかける。区間ごとに変えるのは `open` だけ
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。ベースが大きくなりやすい。ループの RMS が 0.1 前後、ピークが 0.9 未満で、ブレイクとイントロが大きく沈まないこと
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip` と `future` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
 - ブラウザのログ（`.playwright-cli/`）を消してからコミットし、push して main への PR を作る
 
