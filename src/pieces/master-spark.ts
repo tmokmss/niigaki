@@ -131,13 +131,14 @@ export const masterSpark: BossaPiece = {
   // star gold, the forest's yellow-green, love pink, the spark's vermilion
   hues: [48, 100, 325, 18],
   bars: [
-    ...section(INTRO),
+    ...section(INTRO, { guitar: "arp" }),
     ...section(VERSE, full),
-    ...section(BRIDGE, full),
+    ...section(BRIDGE, { ...full, guitar: "arp" }),
     ...section([...CHORUS, ...APPROACH], full),
-    ...section(INTERLUDE, { bass: true }),
-    ...section([...LOW, ...TRESILLO], full),
-    ...section(OUTRO.slice(0, 2), full),
-    ...section(OUTRO.slice(2), { bass: true }),
+    ...section(INTERLUDE, { bass: true, guitar: "arp" }),
+    ...section(LOW, { ...full, guitar: "arp" }),
+    ...section(TRESILLO, { beat: true, bass: true, guitar: "strum" }),
+    ...section(OUTRO.slice(0, 2), { ...full, guitar: "strum" }),
+    ...section(OUTRO.slice(2), { bass: true, guitar: "arp" }),
   ],
 };
