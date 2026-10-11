@@ -7,5 +7,6 @@ import { sugarRush } from "./sugar-rush";
 import { undertow } from "./undertow";
 import { verdigris } from "./verdigris";
 import { vertex } from "./vertex";
+import { voile } from "./voile";
 
-export const pieces = [kappa, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
+export const pieces = [kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
