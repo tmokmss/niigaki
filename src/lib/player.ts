@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import type { ChipPiece, Piece } from "../pieces/types";
 import { chipKit, renderChip } from "./chip";
 import { danmaku } from "./danmaku";
+import { futureKit, renderFuture } from "./future";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
 import type { Kit } from "./score";
@@ -15,7 +16,8 @@ export function mount(
     if (!chipKits.has(t)) chipKits.set(t, chipKit(bpm, t));
     return chipKits.get(t)!;
   };
-  let kit = piece.kind === "chip" ? chip(piece.bpm, piece.timbre ?? "square") : pianoKit(piece.bpm);
+  let kit =
+    piece.kind === "chip" ? chip(piece.bpm, piece.timbre ?? "square") : piece.kind === "future" ? futureKit(piece.bpm) : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
     select.addEventListener("change", () => {
@@ -53,7 +55,8 @@ export function mount(
 
     transport.cancel();
     transport.position = 0;
-    const { events, end } = piece.kind === "chip" ? renderChip(piece) : renderPiano(piece);
+    const { events, end } =
+      piece.kind === "chip" ? renderChip(piece) : piece.kind === "future" ? renderFuture(piece) : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
