@@ -33,7 +33,7 @@ export function renderBossa(piece: BossaPiece) {
     };
     FINGERS.forEach((s, k) => {
       const until = FINGERS[k + 1] ?? 16;
-      add(t + s * six + rand() * 0.008, "guitar", chord(s), (until - s) * six, s ? 0.6 : 0.7);
+      add(t + s * six + rand() * 0.008, "guitar", chord(s), (until - s) * six, s ? 0.45 : 0.75);
     });
     for (const s of [0, 8]) add(t + s * six, "thumb", thumb(s), 8 * six, 0.7);
     if (bar.bass) {
@@ -91,7 +91,7 @@ export function bossaKit(bpm: number): Kit {
     }
     return s;
   };
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 1, -11);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -11);
   const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.3, -11);
 
   const bass = new Tone.PolySynth(Tone.Synth, {

@@ -125,8 +125,8 @@ export const masterSpark: BossaPiece = {
   kind: "bossa",
   slug: "master-spark",
   title: "恋色マスタースパーク",
-  description: "bossa nova arrange / F minor → G minor / 132 BPM",
-  bpm: 132,
+  description: "bossa nova arrange / F minor → G minor / 150 BPM",
+  bpm: 150,
   visual: "danmaku",
   // star gold, the forest's yellow-green, love pink, the spark's vermilion
   hues: [48, 100, 325, 18],
