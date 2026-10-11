@@ -67,6 +67,10 @@ export type FutureBar = {
   riser?: boolean;
   gap?: boolean;
   crash?: boolean;
+  // the chord an octave up as a sixteenth-note glockenspiel ripple
+  sparkle?: boolean;
+  // pitched-up formant "vocal" chops on the chord's top notes
+  chop?: boolean;
 };
 
 export type FuturePiece = {
@@ -75,6 +79,8 @@ export type FuturePiece = {
   title: string;
   description: string;
   bpm: number;
+  // kawaii: music-box lead, swung sixteenth hats with toy clicks, lighter pumping, a bell on each crash and a glide under the riser
+  style?: "kawaii";
   visual?: "danmaku";
   hues?: number[];
   bars: FutureBar[];

@@ -29,7 +29,7 @@ const m = (s: string): Note[] =>
 
 // 3/4 bar -> 4/4 bar: the three beats become 3+3+2 (dotted quarter, dotted quarter, quarter)
 const stretch = (x: number) => (x <= 4 ? x * 1.5 : x <= 8 ? 6 + (x - 4) * 1.5 : 12 + (x - 8));
-const tresillo = (s: string): Note[] => {
+export const tresillo = (s: string): Note[] => {
   let x = 0;
   return m(s).map(([note, n]) => {
     const from = stretch(x);
@@ -52,7 +52,7 @@ const orig = ([c, s]: Line): Row => [c, tresillo(s)];
 const bar = (c: string[], s: string): Row => [c, m(s)];
 
 // the chorus, bars 42-57 of the score
-const THEME: Line[] = [
+export const THEME: Line[] = [
   [Eb, "Eb5:4 G5:2 A5:2 Bb5:4"],
   [F, "D5:4 G5:2 A5:2 Bb5:4"],
   [Gm, "C6:4 Bb5:4 A5:2 Bb5:2"],
@@ -71,7 +71,7 @@ const THEME: Line[] = [
 ];
 
 // bars 10-16
-const VERSE: Line[] = [
+export const VERSE: Line[] = [
   [Bb, "D5:4 E5:4 F5:4"],
   [Am, "A5:4 F5:4 E5:4"],
   [Gm, "D5:8 C5:4"],

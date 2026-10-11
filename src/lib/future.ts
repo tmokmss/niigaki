@@ -14,12 +14,27 @@ const STABS = [
   [12, 3],
 ];
 
+// kawaii: syncopated chops on the chord's top notes, [step, nth note from the top]
+const CHOPS = [
+  [3, 0],
+  [6, 1],
+  [7, 0],
+  [11, 2],
+  [14, 0],
+  [15, 1],
+];
+// kawaii: toy clicks on the swung offbeats
+const PERC = [3, 7, 11, 14];
+
 const cutoff = (open: number) => 200 * Math.pow(60, open);
 
 export function renderFuture(piece: FuturePiece) {
   const beat = 60 / piece.bpm;
   const six = beat / 4;
   const barLen = beat * 4;
+  const kawaii = piece.style === "kawaii";
+  // kawaii: the second sixteenth of each eighth lands late
+  const swing = (s: number) => (kawaii && s % 2 === 1 ? six * 0.2 : 0);
   const { events, add } = collector();
   const gaps: [number, number][] = [];
   let held: NoteEvent[] = [];
@@ -51,12 +66,33 @@ export function renderFuture(piece: FuturePiece) {
       for (let k = 0; k < bar.roll; k++) add(t + (k * barLen) / bar.roll, "snare", [], 0.1, 0.3 + (0.45 * k) / bar.roll);
     }
     if (bar.hat) {
-      // eighths, with sixteenth triplets or a thirty-second roll on beat 4 every other bar
+      // eighths (kawaii: swung sixteenths), with sixteenth triplets or a thirty-second roll on beat 4 every other bar
       const fill = i % 4 === 1 ? 6 : i % 4 === 3 ? 8 : 0;
-      for (let s = 0; s < (fill ? 12 : 16); s += 2) add(t + s * six, "hat", [], 0.04, s % 4 === 2 ? 0.8 : 0.45);
+      for (let s = 0; s < (fill ? 12 : 16); s += kawaii ? 1 : 2) {
+        add(t + s * six + swing(s), "hat", [], 0.04, s % 4 === 2 ? 0.8 : s % 2 ? 0.3 : 0.45);
+      }
       for (let k = 0; k < fill; k++) add(t + 12 * six + (k * beat) / fill, "hat", [], 0.03, 0.4 + (0.3 * k) / fill);
     }
-    if (bar.crash) add(t, "crash", [], 2, 0.8);
+    if (kawaii && bar.hat && bar.kick) for (const s of PERC) add(t + s * six + swing(s), "perc", [], 0.05, s === 14 ? 0.8 : 0.5);
+    if (bar.sparkle) {
+      // the chord an octave up, rippling up and down in sixteenths
+      for (let s = 0; s < 16; s++) {
+        const up = at(s).map((n) => transpose(n, 12));
+        const k = s % (2 * up.length - 2);
+        add(t + s * six, "arp", up[k < up.length ? k : 2 * up.length - 2 - k], six * 0.9, 0.5);
+      }
+    }
+    if (bar.chop) {
+      for (const [s, k] of CHOPS) {
+        const c = at(s);
+        add(t + s * six, "chop", transpose(c[c.length - 1 - k], 12), six * 0.8, 0.7);
+      }
+    }
+    if (bar.crash) {
+      add(t, "crash", [], 2, 0.8);
+      // kawaii: a little bell answers each crash
+      if (kawaii) bar.c.slice(0, 3).forEach((n, k) => add(t + (k * six) / 2, "arp", transpose(n, 24), six * 2, 0.6));
+    }
     if (bar.riser && riserFrom < 0) riserFrom = t;
     if (riserFrom >= 0 && !piece.bars[i + 1]?.riser) {
       add(riserFrom, "riser", [], t + barLen - riserFrom, 0.6);
@@ -88,7 +124,8 @@ export function renderFuture(piece: FuturePiece) {
   return { events: kept, end: piece.bars.length * barLen };
 }
 
-export function futureKit(bpm: number): Kit {
+export function futureKit(bpm: number, style?: FuturePiece["style"]): Kit {
+  const kawaii = style === "kawaii";
   const beat = 60 / bpm;
   const out = new Tone.Compressor(-16, 3);
   out.chain(new Tone.Limiter(-1), Tone.getDestination());
@@ -118,15 +155,59 @@ export function futureKit(bpm: number): Kit {
   });
   wobble.chain(new Tone.Vibrato(3 / beat, 0.05), wah);
 
-  const lead = new Tone.PolySynth(Tone.FMSynth, {
-    harmonicity: 3,
-    modulationIndex: 2.5,
-    oscillator: { type: "sine" },
-    envelope: { attack: 0.002, decay: 0.5, sustain: 0.15, release: 0.4 },
-    modulation: { type: "square" },
-    modulationEnvelope: { attack: 0.002, decay: 0.15, sustain: 0, release: 0.1 },
-    volume: -8,
+  // kawaii: a music box that rings out instead of holding
+  const lead = new Tone.PolySynth(
+    Tone.FMSynth,
+    kawaii
+      ? {
+          harmonicity: 4,
+          modulationIndex: 1.8,
+          oscillator: { type: "sine" },
+          envelope: { attack: 0.001, decay: 0.7, sustain: 0.04, release: 0.6 },
+          modulation: { type: "sine" },
+          modulationEnvelope: { attack: 0.001, decay: 0.25, sustain: 0.05, release: 0.2 },
+          volume: -7,
+        }
+      : {
+          harmonicity: 3,
+          modulationIndex: 2.5,
+          oscillator: { type: "sine" },
+          envelope: { attack: 0.002, decay: 0.5, sustain: 0.15, release: 0.4 },
+          modulation: { type: "square" },
+          modulationEnvelope: { attack: 0.002, decay: 0.15, sustain: 0, release: 0.1 },
+          volume: -8,
+        },
+  ).connect(delay);
+
+  // decorations: glockenspiel sparkles, formant "vocal" chops, and (kawaii) toy clicks and a rising glide under the riser
+  const glock = new Tone.PolySynth(Tone.FMSynth, {
+    harmonicity: 5.4,
+    modulationIndex: 1.2,
+    envelope: { attack: 0.001, decay: 0.25, sustain: 0, release: 0.25 },
+    modulationEnvelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
+    volume: -10,
   }).connect(delay);
+  const voice = new Tone.Gain(1).connect(reverb);
+  const chop = new Tone.Synth({
+    oscillator: { type: "sawtooth" },
+    envelope: { attack: 0.004, decay: 0.08, sustain: 0.5, release: 0.04 },
+    volume: -9,
+  });
+  // a bright "ah": three formant peaks, shifted up like a sped-up voice
+  for (const [f, g] of [
+    [1000, 1],
+    [1600, 0.6],
+    [3300, 0.35],
+  ]) {
+    chop.chain(new Tone.Filter({ frequency: f, type: "bandpass", Q: 5 }), new Tone.Gain(g), voice);
+  }
+  const click = new Tone.MembraneSynth({
+    pitchDecay: 0.008,
+    octaves: 2,
+    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.02 },
+    volume: -24,
+  }).connect(out);
+  const glide = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.5, decay: 0, sustain: 1, release: 0.2 }, volume: -30 }).connect(delay);
 
   // 808: sine sub that drops into pitch and may glide to the next root
   const bass = new Tone.MonoSynth({
@@ -184,15 +265,30 @@ export function futureKit(bpm: number): Kit {
       } else if (e.voice === "kick") {
         kick.triggerAttackRelease(e.notes[0], e.dur, time, e.vel);
         duck.gain.cancelScheduledValues(time);
-        duck.gain.setValueAtTime(0.1, time);
-        duck.gain.setTargetAtTime(1, time + 0.03, beat * 0.18);
+        // kawaii: a lighter, quicker bounce
+        duck.gain.setValueAtTime(kawaii ? 0.35 : 0.1, time);
+        duck.gain.setTargetAtTime(1, time + 0.03, beat * (kawaii ? 0.12 : 0.18));
       } else if (e.voice === "snare") {
         clap.triggerAttackRelease(e.dur, time, e.vel);
       } else if (e.voice === "hat") {
         hat.triggerAttackRelease(e.dur, time, e.vel);
       } else if (e.voice === "crash") {
         crash.triggerAttackRelease(e.dur, time, e.vel);
+      } else if (e.voice === "arp") {
+        glock.triggerAttackRelease(e.notes, e.dur, time, e.vel);
+      } else if (e.voice === "chop") {
+        const f = Tone.Frequency(e.notes[0]).toFrequency();
+        chop.triggerAttackRelease(f, e.dur, time, e.vel);
+        // scoop up into the note, like a chopped syllable
+        chop.frequency.setValueAtTime(f * 0.94, time);
+        chop.frequency.exponentialRampToValueAtTime(f, time + 0.03);
+      } else if (e.voice === "perc") {
+        click.triggerAttackRelease("E6", e.dur, time, e.vel);
       } else if (e.voice === "riser") {
+        if (kawaii) {
+          glide.triggerAttackRelease("C5", e.dur, time);
+          glide.frequency.exponentialRampToValueAtTime(Tone.Frequency("C7").toFrequency(), time + e.dur);
+        }
         riser.start(time).stop(time + e.dur);
         riserFilter.frequency.setValueAtTime(300, time);
         riserFilter.frequency.exponentialRampToValueAtTime(9000, time + e.dur);
@@ -203,6 +299,9 @@ export function futureKit(bpm: number): Kit {
     releaseAll() {
       for (const synth of Object.values(chords)) synth.releaseAll();
       lead.releaseAll();
+      glock.releaseAll();
+      chop.triggerRelease();
+      glide.triggerRelease();
       bass.triggerRelease();
       riser.stop();
       const now = Tone.now();

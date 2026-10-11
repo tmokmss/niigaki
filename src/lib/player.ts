@@ -21,7 +21,7 @@ export function mount(
     piece.kind === "chip"
       ? chip(piece.bpm, piece.timbre ?? "square")
       : piece.kind === "future"
-        ? futureKit(piece.bpm)
+        ? futureKit(piece.bpm, piece.style)
         : piece.kind === "lofi"
           ? lofiKit(piece.bpm)
           : pianoKit(piece.bpm);
