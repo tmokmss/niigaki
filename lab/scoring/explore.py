@@ -13,9 +13,9 @@ def section(piece, first, bars):
     return [shift(n) for n in piece["lead"] if keep(n)], [shift(c) for c in piece["chords"] if keep(c)]
 
 
-def quantize(raw, bpm, beats, end):
-    """Generated (t, dur, pitch) in seconds snapped to sixteenths, one note at a time (the highest wins)."""
-    step = 60 / bpm / 4
+def quantize(raw, bpm, beats, end, per_beat):
+    """Generated (t, dur, pitch) in seconds snapped to the piece's grid, one note at a time (the highest wins)."""
+    step = 60 / bpm / per_beat
     by_onset = {}
     for t, d, p in raw:
         k = round(t / step)
@@ -28,26 +28,26 @@ def quantize(raw, bpm, beats, end):
         n, p = by_onset[k]
         nxt = onsets[i + 1] if i + 1 < len(onsets) else limit
         # notes never cross a barline, so each bar reads as its own line of the score
-        bar_end = (k // (beats * 4) + 1) * beats * 4
-        n = min(n, nxt - k, bar_end - k)
-        lead.append({"bar": k // (beats * 4), "beat": (k % (beats * 4)) / 4, "beats": n / 4, "t": k * step, "dur": n * step, "pitch": p})
+        per_bar = beats * per_beat
+        n = min(n, nxt - k, (k // per_bar + 1) * per_bar - k)
+        lead.append({"bar": k // per_bar, "beat": (k % per_bar) / per_beat, "beats": n / per_beat, "t": k * step, "dur": n * step, "pitch": p})
     return lead
 
 
-def to_m(lead, bars, beats):
-    """The piece-file melody string for each bar: "E5:2 -:2 ..." in sixteenths."""
+def to_m(lead, bars, beats, per_beat):
+    """The piece-file melody string for each bar: "E5:2 -:2 ..." in grid steps (sixteenths, or lo-fi triplet steps)."""
     lines = []
     for b in range(bars):
         x, out = 0, []
         for n in (n for n in lead if n["bar"] == b):
-            at = round(n["beat"] * 4)
+            at = round(n["beat"] * per_beat)
             if at > x:
                 out.append(f"-:{at - x}")
-            length = round(n["beats"] * 4)
+            length = round(n["beats"] * per_beat)
             out.append(f"{NAMES[n['pitch'] % 12]}{n['pitch'] // 12 - 1}" + (f":{length}" if length != 1 else ""))
             x = at + length
-        if x < beats * 4:
-            out.append(f"-:{beats * 4 - x}")
+        if x < beats * per_beat:
+            out.append(f"-:{beats * per_beat - x}")
         lines.append(" ".join(out))
     return lines
 

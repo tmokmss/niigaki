@@ -102,6 +102,6 @@ def infill(model, prompt_lead, chords, start, end, top_p):
     notes = []
     for t, d, note in zip(out[0::3], out[1::3], out[2::3]):
         note -= NOTE_OFFSET
-        if note // MAX_PITCH == LEAD and (t - TIME_OFFSET) / TIME_RESOLUTION >= start - 1e-6:
+        if note // MAX_PITCH == LEAD and t - TIME_OFFSET >= int(TIME_RESOLUTION * start):
             notes.append(((t - TIME_OFFSET) / TIME_RESOLUTION, (d - DUR_OFFSET) / TIME_RESOLUTION, note % MAX_PITCH))
     return notes

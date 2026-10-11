@@ -14,8 +14,10 @@
 mkdir -p lab/scoring/out
 npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json
 cd lab/scoring
-uv run python run.py      # out/results.json と out/audio/*.mp3（初回はモデルを約 1.4GB ダウンロード）
+uv run python run.py      # out/results.json と out/audio/*.mp3（初回はモデルをダウンロード。ディスク上で約 2.7GB）
 uv run python report.py   # out/report.html
 ```
+
+1 曲の採点は `uv run python score_piece.py <slug>`。区間の候補の比較は、候補を JSON に書いて `uv run python variations.py <slug> <最初の小節> <候補.json>`（`out/variations-*.json` と `out/audio/` に出力。候補の書き方は `variations.py` の先頭）。
 
 `ffmpeg` が必要。題材の区間と候補の数は `run.py` の先頭の定数で変える。

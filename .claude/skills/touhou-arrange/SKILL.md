@@ -139,6 +139,8 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
 - worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
+- 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
 - ブラウザのログ（`.playwright-cli/`）を消してからコミットし、push して main への PR を作る
 
