@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import type { ChipPiece, Piece } from "../pieces/types";
 import { bossaKit, renderBossa } from "./bossa";
 import { chipKit, renderChip } from "./chip";
+import { cityPopKit, renderCityPop } from "./citypop";
 import { danmaku } from "./danmaku";
 import { dnbKit, renderDnb } from "./dnb";
 import { dubstepKit, renderDubstep } from "./dubstep";
@@ -36,6 +37,8 @@ export function mount(
                 ? bossaKit(piece.bpm)
                 : piece.kind === "swing"
                   ? swingKit()
+                : piece.kind === "citypop"
+                  ? cityPopKit(piece.bpm)
                   : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
@@ -89,6 +92,8 @@ export function mount(
                   ? renderBossa(piece)
                   : piece.kind === "swing"
                     ? renderSwing(piece)
+                  : piece.kind === "citypop"
+                    ? renderCityPop(piece)
                     : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {

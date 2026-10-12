@@ -223,4 +223,31 @@ export type SwingPiece = {
   bars: SwingBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece;
+// c: the bass root (C2-D3), then the electric piano's voicing with its 7th/9th/11th (G3-D5); c2: chord for beats 3-4; m: [note, sixteenths]
+// the electric piano and the pad always play: held chords in quiet bars, syncopated comping once the beat is in
+// beat: sixteenth-note hats with ghost notes, snare on 2 and 4; bass: fingered sixteenths with octave pops; guitar: sixteenth-note cutting
+// the drums fill beat 4 with toms before each crash
+export type CityPopBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  beat?: boolean;
+  bass?: boolean;
+  guitar?: boolean;
+  // the brass section (trumpet, alto sax, trombone) plays the melody in close harmony instead of the synth lead
+  brass?: boolean;
+  crash?: boolean;
+};
+
+export type CityPopPiece = {
+  kind: "citypop";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: CityPopBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece;
