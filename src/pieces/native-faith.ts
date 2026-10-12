@@ -178,7 +178,7 @@ export const nativeFaith: CityPopPiece = {
   bpm: 112,
   visual: "danmaku",
   // the frog's yellow-green, the lake's blue, a sunset red, the iron ring's green
-  hues: [81, 197, 8, 118],
+  hues: [30, 197, 312, 165],
   bars: [
     ...section(INTRO.slice(0, 2)),
     ...section(INTRO.slice(2), { bass: true }),
