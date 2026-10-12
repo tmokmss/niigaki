@@ -10,6 +10,7 @@ import { futureKit, renderFuture } from "./future";
 import { lofiKit, renderLofi } from "./lofi";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
+import { renderSwing, swingKit } from "./swing";
 import type { Kit } from "./score";
 
 export function mount(
@@ -34,6 +35,8 @@ export function mount(
               ? dubstepKit(piece.bpm)
               : piece.kind === "bossa"
                 ? bossaKit(piece.bpm)
+                : piece.kind === "swing"
+                  ? swingKit()
                 : piece.kind === "citypop"
                   ? cityPopKit(piece.bpm)
                   : pianoKit(piece.bpm);
@@ -87,6 +90,8 @@ export function mount(
                 ? renderDubstep(piece)
                 : piece.kind === "bossa"
                   ? renderBossa(piece)
+                  : piece.kind === "swing"
+                    ? renderSwing(piece)
                   : piece.kind === "citypop"
                     ? renderCityPop(piece)
                     : renderPiano(piece);

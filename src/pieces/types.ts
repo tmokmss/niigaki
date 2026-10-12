@@ -191,6 +191,38 @@ export type BossaPiece = {
   bars: BossaBar[];
 };
 
+// c: the root for the walking bass, then the piano's voicing (G3-C5); c2: chord for beats 3-4
+// m: [note, steps] for the lead horn with 24 steps (sixteenth-note triplets) per bar, so a swung eighth pair is 4 + 2; a: the saxophone's answers on the same grid
+// the piano always comps on 2 and 4; beat: four on the floor, claps on 2 and 4 and swung hats; bass: walking upright bass
+// stab: the horn section hits the chord on the Charleston rhythm or in chopped stutters on beats 3-4; stop: stop-time, the band hits beat 1 only
+// open: gramophone low-pass 0-1, reached by the end of the bar
+export type SwingBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  a?: [string, number][];
+  // the lead line on the clarinet or a high piano instead of the trumpet
+  lead?: "clarinet" | "piano";
+  beat?: boolean;
+  bass?: boolean;
+  stab?: "charleston" | "chop";
+  stop?: boolean;
+  fill?: boolean;
+  open?: number;
+  crash?: boolean;
+};
+
+export type SwingPiece = {
+  kind: "swing";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: SwingBar[];
+};
+
 // c: the bass root (C2-D3), then the electric piano's voicing with its 7th/9th/11th (G3-D5); c2: chord for beats 3-4; m: [note, sixteenths]
 // the electric piano and the pad always play: held chords in quiet bars, syncopated comping once the beat is in
 // beat: sixteenth-note hats with ghost notes, snare on 2 and 4; bass: fingered sixteenths with octave pops; guitar: sixteenth-note cutting
@@ -218,4 +250,4 @@ export type CityPopPiece = {
   bars: CityPopBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | CityPopPiece;
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece;
