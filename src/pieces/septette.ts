@@ -126,7 +126,7 @@ export const septette: DubstepPiece = {
   kind: "dubstep",
   slug: "septette",
   title: "亡き王女の為のセプテット",
-  description: "melodic dubstep arrange / B minor / 145 BPM",
+  description: "melodic dubstep arrange / 145 BPM",
   bpm: 145,
   visual: "danmaku",
   // scarlet, deep crimson, night violet, moonlit magenta

@@ -45,7 +45,7 @@ export const undertow: ChipPiece = {
   kind: "chip",
   slug: "undertow",
   title: "Undertow",
-  description: "chiptune / E phrygian / 160 BPM",
+  description: "chiptune / 160 BPM",
   bpm: 160,
   groove: "break",
   bassline: "pulse",

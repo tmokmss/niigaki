@@ -92,7 +92,7 @@ export const nazrin: LofiPiece = {
   kind: "lofi",
   slug: "nazrin",
   title: "小さな小さな賢将",
-  description: "lo-fi arrange / E♭ minor / 84 BPM",
+  description: "lo-fi arrange / 84 BPM",
   bpm: 84,
   visual: "danmaku",
   // night sky, the gold she dowses for, dusk, a mouse's brown

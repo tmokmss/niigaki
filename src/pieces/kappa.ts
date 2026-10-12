@@ -206,7 +206,7 @@ export const kappa: ChipPiece = {
   kind: "chip",
   slug: "kappa",
   title: "芥川龍之介の河童",
-  description: "chiptune arrange / B♭ major / 170 BPM",
+  description: "chiptune arrange / 170 BPM",
   bpm: 170,
   groove: "four",
   bassline: "octave",
