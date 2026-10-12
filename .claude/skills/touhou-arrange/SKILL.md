@@ -1,6 +1,6 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep・シティポップにアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」「〇〇をシティポップで」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep・ボサノバ・エレクトロスウィング・シティポップ・Synthwave・Uplifting Trance・ジャズピアノトリオにアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、ジャンルの構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を <ジャンル> で」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
@@ -203,10 +203,23 @@ Uplifting Trance（Above & Beyond・Armin van Buuren 風）を頼まれたら `k
 - ドロップは音高の意外さが 2 ビット前後まで上がりやすい。ドロップ全体で 2.0 前後に収まればよく、4 小節ごとに 0.3 未満の区間（同じ旋律の繰り返し）を崩す
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。キックとベースが大きくなりやすい。ドロップでリードの RMS 0.08、ベースとドラム 0.075、ゲートの和音 0.05、アルペジオ 0.025 前後、全体のピークが 0.75 前後なら割れない。ライザーはビルドのピークを押し上げるので 0.5 にする。測るときは区間の頭の前に 0.5 秒空け、前の小節の `open` を先に流す（頭の音が小さく出る）
 
+## 5k. ジャズピアノトリオで組み直す
+
+ジャズを頼まれたら `kind: "jazz"`（`src/lib/jazz.ts`）で書く。例は `src/pieces/necrofantasia.ts`。ドロップは作らず、テーマ → ソロ → テーマの形にする。
+
+- BPM 140〜170 のミディアムスウィング。`m` は 16 分音符の数で書き、音源が 8 分の裏を 3 連の 3 つ目へずらす（スウィング）。原曲の 1 小節をそのまま 1 小節にする
+- 構成：テーマ（原曲の主な旋律を順に。最初の区間は `bass: "two"`・`drums: "brush"`）→ ブレイクや決めの区間（`hits` で全員が旋律と同時に打つ。空いた拍に `fill`）→ サビ 16 → ソロ 16（サビの和音のまま）→ 4 小節交換（ピアノ 4、`drums: "solo"` 4）→ サビ 8（`oct`）→ 原曲の別の旋律で終え、頭の調の属和音（7(♭9)・7(♭13)）と頭の弱起で戻る
+- `c` の先頭はベースの根音、残りは左手の根音を抜いたボイシング 3〜4 音（3-7-9・7-3-13 の形）を C3〜G4 に置く。m → m9・m11・m6/9、長三和音 → maj9・maj7(♯11)、属和音 → 13・13sus・7(♭9)・7(♯9)・7(♭13)。原曲の和音の間に ii-V・裏コード（例：D7 の代わりに A♭7 → G）・バックドア（B♭13 → F）を入れる
+- 旋律が半音上でぶつかる和音（G13 の上の C を伸ばす、など）は sus に替える。採点で事故になる
+- 左手はチャールストンと 4 拍裏の先取りを音源が選ぶ。ベースの `walk` は 4 分で根音・和音の音・次の根音への半音の寄りを、音源が作る
+- ソロはテーマの動機（ネクロファンタジアなら E-C-B と D-C-B-C）から入り、8 分の線・囲み音（上下から寄せる）・和音の音への着地で組む。8 小節ずつ 4〜5 案を `variations.py` で採点する。テーマの繰り返し（2 回目の 8 小節）は 0.3〜0.5 ビットに落ちやすいので、装飾と伸ばしの小節への答えを足す
+- ピアノは Salamander、ベースは FluidR3 GM の `acoustic_bass`（gleitz/midi-js-soundfonts、CC BY 3.0。音名は ♭ 表記で C・E♭・G♭・A の 3 度おき）。tonejs-instruments の `contrabass` は弓弾きで、ウォーキングに使えない。ドラムは合成
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。テーマとソロでリードの RMS 0.05〜0.065、左手 0.035、ベース 0.04、ドラム 0.015〜0.02、全体のピーク 0.5 前後。ブラシはピンクノイズを帯域で絞るとほぼ聞こえなくなるので、音量を大きめに取ってから測る
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`swing`・`citypop`・`synthwave`・`trance` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`swing`・`citypop`・`synthwave`・`trance`・`jazz` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
 - 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
