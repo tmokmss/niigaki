@@ -13,6 +13,7 @@ import { pixels } from "./pixels";
 import { renderSwing, swingKit } from "./swing";
 import type { Kit } from "./score";
 import { renderSynthwave, synthwaveKit } from "./synthwave";
+import { renderTrance, tranceKit } from "./trance";
 
 export function mount(
   piece: Piece,
@@ -42,6 +43,8 @@ export function mount(
                   ? cityPopKit(piece.bpm)
                 : piece.kind === "synthwave"
                   ? synthwaveKit(piece.bpm)
+                : piece.kind === "trance"
+                  ? tranceKit(piece.bpm)
                   : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
@@ -99,6 +102,8 @@ export function mount(
                     ? renderCityPop(piece)
                   : piece.kind === "synthwave"
                     ? renderSynthwave(piece)
+                  : piece.kind === "trance"
+                    ? renderTrance(piece)
                     : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {

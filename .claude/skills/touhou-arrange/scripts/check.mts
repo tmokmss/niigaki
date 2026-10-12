@@ -16,13 +16,14 @@ const { renderBossa } = await load("src/lib/bossa.ts");
 const { renderSwing } = await load("src/lib/swing.ts");
 const { renderCityPop } = await load("src/lib/citypop.ts");
 const { renderSynthwave } = await load("src/lib/synthwave.ts");
+const { renderTrance } = await load("src/lib/trance.ts");
 const { pieces } = await load("src/pieces/index.ts");
 
 const piece = pieces.find((p: { slug: string }) => p.slug === slug);
-if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb, dubstep, bossa, swing, citypop or synthwave piece "${slug}"`);
+if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb, dubstep, bossa, swing, citypop, synthwave or trance piece "${slug}"`);
 
 const beats = piece.beats ?? 4;
-const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep, bossa: renderBossa, swing: renderSwing, citypop: renderCityPop, synthwave: renderSynthwave }[piece.kind as string];
+const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep, bossa: renderBossa, swing: renderSwing, citypop: renderCityPop, synthwave: renderSynthwave, trance: renderTrance }[piece.kind as string];
 const r: { events: Event[]; end: number } = render(piece);
 // lofi and swing bars count sixteenth-note triplets
 const steps = piece.kind === "lofi" || piece.kind === "swing" ? 24 : beats * 4;

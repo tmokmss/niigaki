@@ -280,4 +280,37 @@ export type SynthwavePiece = {
   bars: SynthwaveBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece | SynthwavePiece;
+// c: chord with its add9/7th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
+// lead: who plays the melody (a supersaw with an octave above it unless set); piano also holds the chord
+// chord: the supersaw chords held, or cut into sixteenths by the trance gate; open: their low-pass 0-1, reached by the end of the bar
+// arp: a pluck running up and down the chord; bass: rolling sixteenths between the kicks; riser: one noise sweep across consecutive bars
+export type TranceBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  lead?: "piano" | "pluck";
+  chord?: "pad" | "gate";
+  open?: number;
+  arp?: boolean;
+  bass?: boolean;
+  kick?: boolean;
+  clap?: boolean;
+  hat?: boolean;
+  roll?: 4 | 8 | 16 | 32;
+  riser?: boolean;
+  gap?: boolean;
+  crash?: boolean;
+};
+
+export type TrancePiece = {
+  kind: "trance";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: TranceBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece | SynthwavePiece | TrancePiece;
