@@ -1,6 +1,6 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep・Uplifting Trance にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」「〇〇を Trance で」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
@@ -149,10 +149,22 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 - サビ 2 は、1 オクターブ下で吹いて伸ばしの小節に答えを入れる、3＋3＋2 に割る、半音下から寄せる、8 分前に食う、などの案を `variations.py` で採点して選ぶ
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。伴奏のギターはリードと並ぶくらいにする（前に出しすぎると主張が強く、下げすぎると弱い）。サビで伴奏（親指を含む）とリードの RMS 0.045、ベース 0.04、打楽器 0.03 前後。ギターは弦をはじく瞬間の山が大きいので、ピークが 0.8 以下になるようリードを合わせる
 
+## 5x. Uplifting Trance で組み直す
+
+Uplifting Trance（Above & Beyond・Armin van Buuren 風）を頼まれたら `kind: "trance"`（`src/lib/trance.ts`）で書く。例は `src/pieces/lunatic-princess.ts`。5 章の構成の考え方を守る。
+
+- BPM 136〜140。4 拍子の原曲は 1 小節をそのまま 1 小節にする。原曲の転調はドロップの調にそろえ、旋律を 4 度下か 5 度上へ移して F5〜C6 あたりに置く
+- 構成：イントロ 8（原曲の 16 分の音型を `lead: "pluck"` で。`kick`・`hat`、後半に `clap`・`bass`）→ ブレイクダウン 8（主題を `lead: "piano"` と `chord: "pad"` だけで、`open: 0.25`）→ ビルド 8 → ドロップ 16 → ブレイク 8（原曲の別の旋律をピアノで）→ ビルド 2 8 → ドロップ 2 16（最後の小節を属和音にしてイントロへ戻る）
+- ビルドは主題の頭の音型を詰めながら和音を上り、`chord: "pad"`・`riser`（8 小節で 1 本）・`roll: 4 4 8 8 16 16 32 32`・`open` を 0.35 から 0.9 へ上げ、最後の小節に `gap`。最後の音は和音の半音上で伸ばさない（`gap` で切れるので解決しない）
+- ドロップは `chord: "gate"`（スーパーソーの和音を 16 分で刻む）・`arp`・`bass`（キックの間の 16 分 3 つ）・`kick`・`clap`・`hat`（裏拍のオープンハット）を全部立てる。各半分の頭 2 小節は原曲の旋律のまま、残りを刻み直す。ドロップ 2 はオクターブ跳躍と分散和音にする
+- 和音は add9・maj7・m7 を足して 4〜5 音、根音を先頭に A3〜G4。`m` は既定でスーパーソーのリード（1 オクターブ上を小さく重ねる）が鳴らす
+- ドロップは音高の意外さが 2 ビット前後まで上がりやすい。ドロップ全体で 2.0 前後に収まればよく、4 小節ごとに 0.3 未満の区間（同じ旋律の繰り返し）を崩す
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。キックとベースが大きくなりやすい。ドロップでリードの RMS 0.08、ベースとドラム 0.075、ゲートの和音 0.05、アルペジオ 0.025 前後、全体のピークが 0.75 前後なら割れない。ライザーはビルドのピークを押し上げるので 0.5 にする。測るときは区間の頭の前に 0.5 秒空け、前の小節の `open` を先に流す（頭の音が小さく出る）
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`trance` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
 - 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること

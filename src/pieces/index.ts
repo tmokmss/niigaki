@@ -8,6 +8,7 @@ import { lunaDial } from "./luna-dial";
 import { masterSpark } from "./master-spark";
 import { karakasa } from "./karakasa";
 import { lanterns } from "./lanterns";
+import { lunaticPrincess } from "./lunatic-princess";
 import { nazrin } from "./nazrin";
 import { septette } from "./septette";
 import { snowLight } from "./snow-light";
@@ -17,4 +18,4 @@ import { verdigris } from "./verdigris";
 import { vertex } from "./vertex";
 import { voile } from "./voile";
 
-export const pieces = [masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
+export const pieces = [lunaticPrincess, masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
