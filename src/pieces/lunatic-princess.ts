@@ -154,6 +154,6 @@ export const lunaticPrincess: TrancePiece = {
   bpm: 138,
   visual: "danmaku",
   // bamboo green, moonlit yellow-green, amber, crimson
-  hues: [118, 81, 34, 8],
+  hues: [118, 58, 228, 92],
   bars,
 };
