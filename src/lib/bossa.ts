@@ -90,7 +90,7 @@ export function bossaKit(bpm: number): Kit {
   out.chain(new Tone.Limiter(-1), Tone.getDestination());
   const reverb = new Tone.Reverb({ decay: 2.4, wet: 0.3 }).connect(out);
 
-  // nylon-string guitar and saxophone samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0), in the same room
+  // nylon-string guitar samples from tonejs-instruments by Nicholas Brosowsky (CC BY 3.0)
   // the recordings open with silence or breath: each starts where it reaches a tenth of its peak
   const trim = (buf: Tone.ToneAudioBuffer) => {
     const ch = buf.getChannelData(0);
@@ -105,11 +105,9 @@ export function bossaKit(bpm: number): Kit {
     }
     return s;
   };
-  // the dry saxophone sounds thin: soften its top and give it a longer, deeper hall of its own on top of the room
-  const saxRoom = new Tone.Filter(3200, "lowpass");
-  saxRoom.chain(new Tone.Reverb({ decay: 3.2, wet: 0.45 }), reverb);
-  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -12, reverb);
-  const sax = sampler("saxophone", ["D3", "F3", "G3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5"], 0.6, -11, saxRoom);
+  const guitar = sampler("guitar-nylon", ["E2", "A2", "D3", "G3", "C#4", "E4", "A4", "C#5", "E5"], 0.5, -14, reverb);
+  // the melody on a second guitar, picked above the comping as one player would
+  const melody = sampler("guitar-nylon", ["A3", "C#4", "E4", "A4", "C#5", "E5", "G5", "A5"], 0.6, -5, reverb);
 
   const bass = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: "triangle" },
@@ -146,8 +144,7 @@ export function bossaKit(bpm: number): Kit {
       } else if (e.voice === "thumb") {
         guitar.triggerAttackRelease(e.notes, e.dur, time, e.vel);
       } else if (e.voice === "lead") {
-        // a tenor saxophone, sounding an octave below the written line
-        sax.triggerAttackRelease(e.notes.map((n) => transpose(n, -12)), e.dur, time, e.vel);
+        melody.triggerAttackRelease(e.notes, e.dur, time, e.vel);
       } else if (e.voice === "bass") {
         bass.triggerAttackRelease(e.notes, e.dur, time, e.vel);
       } else if (e.voice === "kick") {
@@ -161,7 +158,7 @@ export function bossaKit(bpm: number): Kit {
       }
     },
     releaseAll() {
-      sax.releaseAll();
+      melody.releaseAll();
       guitar.releaseAll();
       bass.releaseAll();
     },
