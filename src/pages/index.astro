@@ -7,7 +7,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 <Base title="niigaki">
   <main>
     <h1>niigaki</h1>
-    <p class="lead">Claude が作曲・アレンジした曲。ブラウザで鳴ります</p>
+    <p class="lead">Claude が作曲・アレンジした曲</p>
     <ul>
       {pieces.map((p) => {
         const hue = "hues" in p ? p.hues?.[0] : undefined;
