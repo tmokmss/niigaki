@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import type { ChipPiece, Piece } from "../pieces/types";
 import { bossaKit, renderBossa } from "./bossa";
 import { chipKit, renderChip } from "./chip";
+import { cityPopKit, renderCityPop } from "./citypop";
 import { danmaku } from "./danmaku";
 import { dnbKit, renderDnb } from "./dnb";
 import { dubstepKit, renderDubstep } from "./dubstep";
@@ -9,7 +10,9 @@ import { futureKit, renderFuture } from "./future";
 import { lofiKit, renderLofi } from "./lofi";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
+import { renderSwing, swingKit } from "./swing";
 import type { Kit } from "./score";
+import { renderSynthwave, synthwaveKit } from "./synthwave";
 import { renderTrance, tranceKit } from "./trance";
 
 export function mount(
@@ -34,6 +37,12 @@ export function mount(
               ? dubstepKit(piece.bpm)
               : piece.kind === "bossa"
                 ? bossaKit(piece.bpm)
+                : piece.kind === "swing"
+                  ? swingKit()
+                : piece.kind === "citypop"
+                  ? cityPopKit(piece.bpm)
+                : piece.kind === "synthwave"
+                  ? synthwaveKit(piece.bpm)
                 : piece.kind === "trance"
                   ? tranceKit(piece.bpm)
                   : pianoKit(piece.bpm);
@@ -87,6 +96,12 @@ export function mount(
                 ? renderDubstep(piece)
                 : piece.kind === "bossa"
                   ? renderBossa(piece)
+                  : piece.kind === "swing"
+                    ? renderSwing(piece)
+                  : piece.kind === "citypop"
+                    ? renderCityPop(piece)
+                  : piece.kind === "synthwave"
+                    ? renderSynthwave(piece)
                   : piece.kind === "trance"
                     ? renderTrance(piece)
                     : renderPiano(piece);

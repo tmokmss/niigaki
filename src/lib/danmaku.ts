@@ -176,7 +176,7 @@ export function danmaku(canvas: HTMLCanvasElement, hues: number[]) {
 
   return (e: NoteEvent) => {
     const tone = e.notes.length ? hue + ((midi(e.notes[0]) % 12) - 6) * 6 : hue;
-    if (e.voice === "lead") {
+    if (e.voice === "lead" || e.voice === "sax") {
       if (e.dur > 0.3) ring(20, 130, 7, tone, (ringSpin += 0.16));
       else ring(8, 190, 5, tone, (ringSpin += 0.35));
     }

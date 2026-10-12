@@ -9,7 +9,7 @@ type Chord = { bar: number; beat: number; beats: number; t: number; dur: number;
 const out = pieces.map((piece) => {
   const beats = "beats" in piece && piece.beats ? piece.beats : 4;
   // the length of one melody unit in beats
-  const unit = piece.kind === "piano" ? 1 : piece.kind === "lofi" ? 1 / 6 : 1 / 4;
+  const unit = piece.kind === "piano" ? 1 : piece.kind === "lofi" || piece.kind === "swing" ? 1 / 6 : 1 / 4;
   const lead: Note[] = [];
   const chords: Chord[] = [];
   let t = 0;
