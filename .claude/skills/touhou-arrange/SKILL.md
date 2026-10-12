@@ -149,7 +149,7 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 - サビ 2 は、1 オクターブ下で吹いて伸ばしの小節に答えを入れる、3＋3＋2 に割る、半音下から寄せる、8 分前に食う、などの案を `variations.py` で採点して選ぶ
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。伴奏のギターはリードと並ぶくらいにする（前に出しすぎると主張が強く、下げすぎると弱い）。サビで伴奏（親指を含む）とリードの RMS 0.045、ベース 0.04、打楽器 0.03 前後。ギターは弦をはじく瞬間の山が大きいので、ピークが 0.8 以下になるようリードを合わせる
 
-## 5x. Uplifting Trance で組み直す
+## 5j. Uplifting Trance で組み直す
 
 Uplifting Trance（Above & Beyond・Armin van Buuren 風）を頼まれたら `kind: "trance"`（`src/lib/trance.ts`）で書く。例は `src/pieces/lunatic-princess.ts`。5 章の構成の考え方を守る。
 
