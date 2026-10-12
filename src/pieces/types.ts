@@ -191,4 +191,36 @@ export type BossaPiece = {
   bars: BossaBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece;
+// c: the root for the bass, then the piano's rootless left-hand voicing (3-7-9 or 7-3-13 around C3-G4); c2: chord for beats 3-4
+// m: [note, sixteenths], played swung: the second eighth of each beat falls on the last triplet
+export type JazzBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  // walk: quarter notes with chromatic approaches into the next root; two: half notes
+  bass?: "walk" | "two";
+  // the left hand comps in Charleston and anticipation rhythms
+  comp?: boolean;
+  // stop-time: piano, bass and drums hit together on each melody note
+  hits?: boolean;
+  // solo: the drums take the bar alone, as when trading fours
+  drums?: "brush" | "ride" | "solo";
+  // a snare and tom fill over beats 3-4
+  fill?: boolean;
+  // the melody doubled an octave below
+  oct?: boolean;
+  crash?: boolean;
+};
+
+export type JazzPiece = {
+  kind: "jazz";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: JazzBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | JazzPiece;
