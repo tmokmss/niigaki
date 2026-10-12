@@ -1,5 +1,6 @@
 import * as Tone from "tone";
 import type { ChipPiece, Piece } from "../pieces/types";
+import { bossaKit, renderBossa } from "./bossa";
 import { chipKit, renderChip } from "./chip";
 import { danmaku } from "./danmaku";
 import { dnbKit, renderDnb } from "./dnb";
@@ -30,7 +31,9 @@ export function mount(
             ? dnbKit(piece.bpm)
             : piece.kind === "dubstep"
               ? dubstepKit(piece.bpm)
-              : pianoKit(piece.bpm);
+              : piece.kind === "bossa"
+                ? bossaKit(piece.bpm)
+                : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
     select.addEventListener("change", () => {
@@ -79,7 +82,9 @@ export function mount(
               ? renderDnb(piece)
               : piece.kind === "dubstep"
                 ? renderDubstep(piece)
-                : renderPiano(piece);
+                : piece.kind === "bossa"
+                  ? renderBossa(piece)
+                  : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
