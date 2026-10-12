@@ -345,4 +345,40 @@ export type JazzPiece = {
   bars: JazzBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece | SynthwavePiece | TrancePiece | JazzPiece;
+export type Instrument = "flute" | "clarinet" | "violin" | "cello" | "horn" | "trumpet" | "trombone" | "harp";
+
+// c: the root for the cellos (C2-C3), the basses an octave below, then the upper strings' voicing (G3-E5); c2: chord for beats 3-4
+// m: [note, sixteenths] played by every instrument in lead (the violins unless set) and an octave lower by those in low
+// a: a countermelody on the same grid, played by counter (the horns unless set)
+// dyn: the dynamic from 0 (pp) to 1 (ff) reached by the end of the bar; held chords swell towards it
+export type OrchestraBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  lead?: Instrument[];
+  low?: Instrument[];
+  a?: [string, number][];
+  counter?: Instrument;
+  dyn?: number;
+  // the rest of the strings: held, bowed tremolo, held over basses in eighths, or plucked on 3+3+2
+  strings?: "pad" | "tremolo" | "pulse" | "pizz";
+  // sixteenths up and down the chord, or a sweep up through it on beat 4
+  harp?: "arp" | "gliss";
+  // horns, trombones and tuba hold the chord
+  brass?: boolean;
+  timp?: "hit" | "roll";
+  cymbal?: "crash" | "swell";
+};
+
+export type OrchestraPiece = {
+  kind: "orchestra";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: OrchestraBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece | SynthwavePiece | TrancePiece | JazzPiece | OrchestraPiece;
