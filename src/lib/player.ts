@@ -9,6 +9,7 @@ import { futureKit, renderFuture } from "./future";
 import { lofiKit, renderLofi } from "./lofi";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
+import { renderSwing, swingKit } from "./swing";
 import type { Kit } from "./score";
 
 export function mount(
@@ -33,7 +34,9 @@ export function mount(
               ? dubstepKit(piece.bpm)
               : piece.kind === "bossa"
                 ? bossaKit(piece.bpm)
-                : pianoKit(piece.bpm);
+                : piece.kind === "swing"
+                  ? swingKit()
+                  : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
     select.addEventListener("change", () => {
@@ -84,7 +87,9 @@ export function mount(
                 ? renderDubstep(piece)
                 : piece.kind === "bossa"
                   ? renderBossa(piece)
-                  : renderPiano(piece);
+                  : piece.kind === "swing"
+                    ? renderSwing(piece)
+                    : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {
         kit.play(e, time);
