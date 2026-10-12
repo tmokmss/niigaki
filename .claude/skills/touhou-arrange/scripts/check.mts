@@ -13,13 +13,14 @@ const { renderLofi } = await load("src/lib/lofi.ts");
 const { renderDnb } = await load("src/lib/dnb.ts");
 const { renderDubstep } = await load("src/lib/dubstep.ts");
 const { renderBossa } = await load("src/lib/bossa.ts");
+const { renderCityPop } = await load("src/lib/citypop.ts");
 const { pieces } = await load("src/pieces/index.ts");
 
 const piece = pieces.find((p: { slug: string }) => p.slug === slug);
-if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb, dubstep or bossa piece "${slug}"`);
+if (!piece || piece.kind === "piano") throw new Error(`no chip, future, lofi, dnb, dubstep, bossa or citypop piece "${slug}"`);
 
 const beats = piece.beats ?? 4;
-const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep, bossa: renderBossa }[piece.kind as string];
+const render = { chip: renderChip, future: renderFuture, lofi: renderLofi, dnb: renderDnb, dubstep: renderDubstep, bossa: renderBossa, citypop: renderCityPop }[piece.kind as string];
 const r: { events: Event[]; end: number } = render(piece);
 // lofi bars count sixteenth-note triplets
 const steps = piece.kind === "lofi" ? 24 : beats * 4;
@@ -28,7 +29,7 @@ const badBars = (piece.bars as Bar[])
   .filter(([, n]) => n !== 0 && Math.abs(n - steps) > 1e-9);
 const seen = new Set<string>();
 const collisions = r.events.filter((e) => {
-  if (!["kick", "snare", "hat", "crash"].includes(e.voice)) return false;
+  if (!["kick", "snare", "hat", "ohat", "tom", "crash"].includes(e.voice)) return false;
   const k = `${e.voice}@${e.t.toFixed(6)}`;
   const dup = seen.has(k);
   seen.add(k);

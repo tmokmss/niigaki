@@ -1,6 +1,6 @@
 ---
 name: touhou-arrange
-description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep にアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」と頼まれたときに使う。
+description: niigaki リポジトリで、東方 Project の原曲をチップチューン（Chipzel 風）・Future Bass・Lo-Fi Hip Hop・Liquid Drum & Bass・Melodic Dubstep・シティポップにアレンジしてサイトに載せる。楽譜 PDF を探して書き起こし、4 拍子の Chipzel 構成に組み直し、弾幕の背景で鳴らす。「東方の〇〇をアレンジして」「〇〇を Chipzel 風に」「〇〇を Future Bass で」「〇〇を Lo-Fi で」「〇〇を Drum & Bass で」「〇〇を Melodic Dubstep で」「〇〇をシティポップで」と頼まれたときに使う。
 ---
 
 # 東方アレンジ（niigaki）
@@ -149,10 +149,25 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 - サビ 2 は、1 オクターブ下で吹いて伸ばしの小節に答えを入れる、3＋3＋2 に割る、半音下から寄せる、8 分前に食う、などの案を `variations.py` で採点して選ぶ
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。伴奏のギターはリードと並ぶくらいにする（前に出しすぎると主張が強く、下げすぎると弱い）。サビで伴奏（親指を含む）とリードの RMS 0.045、ベース 0.04、打楽器 0.03 前後。ギターは弦をはじく瞬間の山が大きいので、ピークが 0.8 以下になるようリードを合わせる
 
+## 5x. シティポップで組み直す
+
+シティポップ（山下達郎・竹内まりや・杏里の頃）を頼まれたら `kind: "citypop"`（`src/lib/citypop.ts`）で書く。例は `src/pieces/native-faith.ts`。ドロップは作らず、主題の頭で原曲を名乗り、繰り返しを崩していく。
+
+- BPM 105〜118。4 拍子の原曲は 1 小節をそのまま 1 小節にする（`m` は 16 分音符の数）。速い原曲も旋律の音価は変えない
+- 構成：イントロ 4（原曲のイントロをエレピとリードだけで）→ キメ 4（`brass`）→ 主題 16 → 原曲の別の旋律 16 → キメの区間 16 → 主題 2 16 → アウトロ 2（属和音で終える）。原曲の転調はそのまま使う。最後の主題を半音上げると J-POP らしい盛り上がりになる
+- `c` の先頭はベースの根音（C2〜D3）、残りはエレピのボイシング 4〜5 音を G3〜D5 に置く。m → m9、長三和音 → maj9・add9・6/9、属和音 → 7(#9)・7(b13)・9sus4（11）。旋律と半音でぶつかる音は外す
+- 主題の終わりに「Just The Two Of Us」進行（IVmaj7 → III7 → vim）、長調の旋律には王道進行（IVmaj7 → V → iiim7 → vim）を当てる
+- エレピ（DX7 風の FM、1:1 の胴と 14:1 の鐘、コーラス）とストリングスのパッドは毎小節鳴る。`beat` が無い小節はエレピが和音を伸ばし、ある小節は 16 分のシンコペーションで刻む
+- `beat` は 16 分のハット（裏はゴースト）、2・4 拍のスネアとゴースト、1 小節おきに 4 拍裏のオープンハット。`crash` の前の小節は 4 拍目がタムのフィルになる。`bass` は指弾きの 16 分にオクターブ上のプル、和音が変わる前に半音下から寄る。`guitar` は 16 分のカッティング（2・4 拍が強く、ほかはミュート）
+- 原曲の 3＋3＋2 のキメは `brass`：トランペットが旋律、アルトサックスとトロンボーンがその下の和音の音を吹く。トランペットの素材は C6 までなので、旋律は 1 オクターブ下げて書く
+- リードはリリコン風のシンセ（細いノコギリ波・ビブラート・付点 8 分のディレイ）。サックスの素材はリードにしない
+- 繰り返しの後半は、3＋3＋2 に割る、伸ばしの小節に 16 分の回し・答えを入れる、1 オクターブ上げる、などの案を `variations.py` で採点して選ぶ。転調直後の主題は 2.5 ビットを超えやすいが、原曲の旋律なので崩さない
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。主題でリード 0.07、ブラス 0.075、ベース・ドラム 0.06、エレピ 0.045、ギター 0.03、パッド 0.018 前後、全体のピークが 0.75 以下なら割れず、エレピとギターが埋もれない
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`citypop` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
 - 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
