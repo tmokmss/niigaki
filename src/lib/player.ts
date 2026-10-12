@@ -9,6 +9,7 @@ import { dubstepKit, renderDubstep } from "./dubstep";
 import { futureKit, renderFuture } from "./future";
 import { jazzKit, renderJazz } from "./jazz";
 import { lofiKit, renderLofi } from "./lofi";
+import { orchestraKit, renderOrchestra } from "./orchestra";
 import { pianoKit, renderPiano, sparks } from "./piano";
 import { pixels } from "./pixels";
 import { renderSwing, swingKit } from "./swing";
@@ -48,6 +49,8 @@ export function mount(
                   ? tranceKit(piece.bpm)
                 : piece.kind === "jazz"
                   ? jazzKit()
+                : piece.kind === "orchestra"
+                  ? orchestraKit(piece.bpm)
                   : pianoKit(piece.bpm);
   if (piece.kind === "chip" && els.timbre) {
     const select = els.timbre;
@@ -109,6 +112,8 @@ export function mount(
                     ? renderTrance(piece)
                   : piece.kind === "jazz"
                     ? renderJazz(piece)
+                  : piece.kind === "orchestra"
+                    ? renderOrchestra(piece)
                     : renderPiano(piece);
     for (const e of events) {
       transport.schedule((time) => {

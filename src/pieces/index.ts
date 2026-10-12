@@ -1,4 +1,5 @@
 import { afterglow } from "./afterglow";
+import { borderOfLife } from "./border-of-life";
 import { greenEyed } from "./green-eyed";
 import { greenEyedDnb } from "./green-eyed-dnb";
 import { kamigami } from "./kamigami";
@@ -22,4 +23,4 @@ import { verdigris } from "./verdigris";
 import { vertex } from "./vertex";
 import { voile } from "./voile";
 
-export const pieces = [necrofantasia, lunaticPrincess, satori, nativeFaith, owen, masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
+export const pieces = [borderOfLife, necrofantasia, lunaticPrincess, satori, nativeFaith, owen, masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];

@@ -180,13 +180,13 @@ export function danmaku(canvas: HTMLCanvasElement, hues: number[]) {
       if (e.dur > 0.3) ring(20, 130, 7, tone, (ringSpin += 0.16));
       else ring(8, 190, 5, tone, (ringSpin += 0.35));
     }
-    if (e.voice === "harm") ring(10, 110, 4, tone + 40, ringSpin + Math.PI / 10);
+    if (e.voice === "harm" || e.voice === "counter") ring(10, 110, 4, tone + 40, ringSpin + Math.PI / 10);
     if (e.voice === "arp") shoot((spiral += 0.45), 160, 3.5, tone + 80);
     if (e.voice === "bass" && clock - lastBass > 1) {
       lastBass = clock;
       for (const a of [-0.5, -0.25, 0, 0.25, 0.5]) shoot(Math.PI / 2 + a, 90, 12, tone - 30);
     }
-    if (e.voice === "kick") pulse = 1;
+    if (e.voice === "kick" || e.voice === "timpani") pulse = 1;
     if (e.voice === "snare" && e.vel >= 0.8) {
       const b = boss();
       const aim = Math.atan2(canvas.height - b.y, canvas.width * (0.2 + Math.random() * 0.6) - b.x);
