@@ -9,7 +9,11 @@ import { masterSpark } from "./master-spark";
 import { necrofantasia } from "./necrofantasia";
 import { karakasa } from "./karakasa";
 import { lanterns } from "./lanterns";
+import { nativeFaith } from "./native-faith";
+import { lunaticPrincess } from "./lunatic-princess";
 import { nazrin } from "./nazrin";
+import { owen } from "./owen";
+import { satori } from "./satori";
 import { septette } from "./septette";
 import { snowLight } from "./snow-light";
 import { sugarRush } from "./sugar-rush";
@@ -18,4 +22,4 @@ import { verdigris } from "./verdigris";
 import { vertex } from "./vertex";
 import { voile } from "./voile";
 
-export const pieces = [necrofantasia, masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];
+export const pieces = [necrofantasia, lunaticPrincess, satori, nativeFaith, owen, masterSpark, lunaDial, septette, kappaKawaii, greenEyedDnb, nazrin, kamigami, karakasa, kappa, voile, greenEyed, vertex, afterglow, sugarRush, undertow, verdigris, lanterns, snowLight];

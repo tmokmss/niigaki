@@ -4,7 +4,7 @@ The composer writes the candidates; the model only scores them.
 
 usage: uv run python variations.py <slug> <first bar, 1-based> <candidates.json>
 candidates.json: {"<id>": ["<bar 1 melody>", "<bar 2 melody>", ...]} in the piece's grid steps
-(24 per bar for lo-fi, sixteenths otherwise), e.g. "G5:6 -:3 D6:3 C6:12"; "~" holds the previous note
+(24 per bar for lo-fi and swing, sixteenths otherwise), e.g. "G5:6 -:3 D6:3 C6:12"; "~" holds the previous note
 writes out/variations-<slug>-<first bar>.json and out/audio/<slug>-<first bar>-<id>.mp3 (the 4 bars before and the new bars)
 """
 
@@ -49,7 +49,7 @@ def parse(lines, first, p, per_beat):
 
 def main(slug, first, path):
     p = next(x for x in load_pieces() if x["slug"] == slug)
-    per_beat = 6 if p["kind"] == "lofi" else 4
+    per_beat = 6 if p["kind"] in ("lofi", "swing") else 4
     written = json.loads(Path(path).read_text())
     bars = len(next(iter(written.values())))
     first -= 1
