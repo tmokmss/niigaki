@@ -69,7 +69,7 @@ export const verdigris: ChipPiece = {
   kind: "chip",
   slug: "verdigris",
   title: "Verdigris",
-  description: "chiptune / E minor / 155 BPM",
+  description: "chiptune / 155 BPM",
   bpm: 155,
   groove: "four",
   bassline: "octave",

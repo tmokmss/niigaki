@@ -47,7 +47,7 @@ export const sugarRush: ChipPiece = {
   kind: "chip",
   slug: "sugar-rush",
   title: "Sugar Rush",
-  description: "chiptune / C major / 172 BPM",
+  description: "chiptune / 172 BPM",
   bpm: 172,
   groove: "four",
   bassline: "fifth",

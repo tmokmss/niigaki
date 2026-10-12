@@ -136,7 +136,7 @@ export const kamigami: FuturePiece = {
   kind: "future",
   slug: "kamigami",
   title: "神々が恋した幻想郷",
-  description: "future bass arrange / F major / 150 BPM",
+  description: "future bass arrange / 150 BPM",
   bpm: 150,
   visual: "danmaku",
   hues: [15, 40, 355, 55],

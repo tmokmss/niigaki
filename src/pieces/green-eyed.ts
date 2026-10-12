@@ -221,7 +221,7 @@ export const greenEyed: ChipPiece = {
   kind: "chip",
   slug: "green-eyed",
   title: "緑眼のジェラシー",
-  description: "chiptune arrange / E minor / 165 BPM",
+  description: "chiptune arrange / 165 BPM",
   bpm: 165,
   groove: "four",
   bassline: "octave",

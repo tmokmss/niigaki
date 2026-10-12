@@ -116,7 +116,7 @@ export const lunaDial: LofiPiece = {
   kind: "lofi",
   slug: "luna-dial",
   title: "月時計 ～ ルナ・ダイアル",
-  description: "lo-fi arrange / G minor / 82 BPM",
+  description: "lo-fi arrange / 82 BPM",
   bpm: 82,
   visual: "danmaku",
   // moonlit steel, the mansion's crimson, the pocket watch's brass, dusk

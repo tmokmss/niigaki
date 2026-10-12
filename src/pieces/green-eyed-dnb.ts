@@ -66,7 +66,7 @@ export const greenEyedDnb: DnbPiece = {
   kind: "dnb",
   slug: "green-eyed-dnb",
   title: "緑眼のジェラシー",
-  description: "liquid drum & bass arrange / E minor / 174 BPM",
+  description: "liquid drum & bass arrange / 174 BPM",
   bpm: 174,
   visual: "danmaku",
   // emerald, night blue, deep green, indigo

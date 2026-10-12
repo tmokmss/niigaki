@@ -7,25 +7,29 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 <Base title="niigaki">
   <main>
     <h1>niigaki</h1>
-    <p class="lead">Claude が書いた、ブラウザで鳴る小品集</p>
     <ul>
-      {pieces.map((p) => (
-        <li>
-          <a href={`${base}/${p.slug}/`}>{p.title}</a>
-          <span>{p.description}</span>
-        </li>
-      ))}
+      {pieces.map((p) => {
+        const hue = "hues" in p ? p.hues?.[0] : undefined;
+        return (
+          <li style={hue === undefined ? "--c: #8a8f9c" : `--c: hsl(${hue} 85% 65%)`}>
+            <a href={`${base}/${p.slug}/`}>
+              <span class="title">{p.title}</span>
+              <span class="meta">{p.description}</span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </main>
 </Base>
 
 <style>
-  main { max-width: 32rem; margin: 18vh auto; padding: 0 1.5rem; }
-  h1 { font-weight: 300; letter-spacing: .3em; font-size: 1.6rem; margin: 0 0 .4rem; }
-  .lead { opacity: .6; font-size: .9rem; margin: 0 0 3rem; }
-  ul { list-style: none; padding: 0; margin: 0; }
-  li { display: flex; justify-content: space-between; align-items: baseline; padding: 1rem 0; border-top: 1px solid #2a2e38; }
-  li a { text-decoration: none; letter-spacing: .2em; font-size: 1.1rem; }
-  li a:hover { opacity: .7; }
-  li span { opacity: .5; font-size: .8rem; }
+  main { max-width: 36rem; margin: 0 auto; padding: 4.5rem 1.25rem 4rem; font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; }
+  h1 { font-family: "Hiragino Mincho ProN", serif; font-weight: 300; letter-spacing: .3em; font-size: 1.6rem; margin: 0 0 2.5rem; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
+  a { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem 1rem; padding: .85rem 1rem; border-left: 3px solid var(--c); background: #161922; text-decoration: none; transition: background .15s; }
+  a:hover { background: color-mix(in srgb, var(--c) 14%, #161922); }
+  .title { font-family: "Hiragino Mincho ProN", serif; font-size: 1.1rem; letter-spacing: .1em; }
+  .meta { color: var(--c); font-size: .78rem; letter-spacing: .02em; opacity: .85; }
+  @media (max-width: 30rem) { a { flex-direction: column; } }
 </style>

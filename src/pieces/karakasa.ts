@@ -139,7 +139,7 @@ export const karakasa: ChipPiece = {
   kind: "chip",
   slug: "karakasa",
   title: "万年置き傘にご注意を",
-  description: "chiptune arrange / G# minor / 160 BPM",
+  description: "chiptune arrange / 160 BPM",
   bpm: 160,
   groove: "four",
   bassline: "octave",

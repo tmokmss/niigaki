@@ -138,7 +138,7 @@ export const kappaKawaii: FuturePiece = {
   kind: "future",
   slug: "kappa-kawaii",
   title: "芥川龍之介の河童",
-  description: "kawaii future bass arrange / B♭ major / 160 BPM",
+  description: "kawaii future bass arrange / 160 BPM",
   bpm: 160,
   style: "kawaii",
   visual: "danmaku",

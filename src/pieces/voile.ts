@@ -173,7 +173,7 @@ export const voile: ChipPiece = {
   kind: "chip",
   slug: "voile",
   title: "ヴワル魔法図書館",
-  description: "chiptune arrange / A minor / 160 BPM",
+  description: "chiptune arrange / 160 BPM",
   bpm: 160,
   groove: "four",
   bassline: "octave",

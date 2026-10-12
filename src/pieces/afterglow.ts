@@ -53,7 +53,7 @@ export const afterglow: ChipPiece = {
   kind: "chip",
   slug: "afterglow",
   title: "Afterglow",
-  description: "chiptune / D minor / 128 BPM",
+  description: "chiptune / 128 BPM",
   bpm: 128,
   groove: "half",
   bassline: "octave",
