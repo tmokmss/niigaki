@@ -250,4 +250,34 @@ export type CityPopPiece = {
   bars: CityPopBar[];
 };
 
-export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece;
+// c: chord with its 7th/9th, root A3-G4 first; c2: chord for beats 3-4; m: [note, sixteenths]
+// the chorused saw pad always holds the chord; open: pad and arp low-pass 0-1, reached by the end of the bar
+// beat: kick on 1 and 3 under a gated-reverb snare on 2 and 4, with sixteenth hats; hat: the hats alone
+// bass: sixteenths jumping between the root and its octave, ducked under the kick; arp: the chord in sixteenth-note plucks
+// fill: toms rolling down across beats 3-4; sax: the lead turns from the saw to a breathy FM sax
+export type SynthwaveBar = {
+  c: string[];
+  c2?: string[];
+  m?: [string, number][];
+  open?: number;
+  beat?: boolean;
+  hat?: boolean;
+  bass?: boolean;
+  arp?: boolean;
+  fill?: boolean;
+  sax?: boolean;
+  crash?: boolean;
+};
+
+export type SynthwavePiece = {
+  kind: "synthwave";
+  slug: string;
+  title: string;
+  description: string;
+  bpm: number;
+  visual?: "danmaku";
+  hues?: number[];
+  bars: SynthwaveBar[];
+};
+
+export type Piece = PianoPiece | ChipPiece | FuturePiece | LofiPiece | DnbPiece | DubstepPiece | BossaPiece | SwingPiece | CityPopPiece | SynthwavePiece;

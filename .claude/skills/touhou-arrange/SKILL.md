@@ -178,10 +178,23 @@ Melodic Dubstep（Illenium・Seven Lions 風）を頼まれたら `kind: "dubste
 - 繰り返しの後半は、3＋3＋2 に割る、伸ばしの小節に 16 分の回し・答えを入れる、1 オクターブ上げる、などの案を `variations.py` で採点して選ぶ。転調直後の主題は 2.5 ビットを超えやすいが、原曲の旋律なので崩さない
 - 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。主題でリード 0.07、ブラス 0.075、ベース・ドラム 0.06、エレピ 0.045、ギター 0.03、パッド 0.018 前後、全体のピークが 0.75 以下なら割れず、エレピとギターが埋もれない
 
+## 5i. Synthwave で組み直す
+
+Synthwave（Kavinsky・The Midnight・FM-84 風）を頼まれたら `kind: "synthwave"`（`src/lib/synthwave.ts`）で書く。例は `src/pieces/satori.ts`。ドロップはサビ（ドラムとベースが全開になる区間）とし、5 章の構成の考え方を守る。
+
+- BPM 100〜118。4 拍子の原曲は 1 小節をそのまま 1 小節にし、旋律の音価は変えない（速い原曲はゆったりした夜の歩みになる）
+- 構成：イントロ 8（主題を原曲の高さで、`arp` とパッドとリード。後半 4 小節に `hat`・`bass`）→ A 8（主題を 1 オクターブ上で `beat`、後半は伸ばしの音に和音の答えを入れる）→ プレサビ 8（原曲の別の旋律。前半は `bass`・`hat`、後半は `beat` を足し `open` を 0.6 → 1 へ上げる）→ サビ 16 → 間奏 8（`sax`、ドラムとベースを抜き `open: 0.3`）→ サビ 2 16 → アウトロ 4（主題の頭を原曲の高さで、属和音で終える）
+- 原曲が半音上へ転調するなら、サビからその調にする（80 年代らしい転調になる）。旋律は元の調で書いて半音上げる関数に通す
+- 各区間の最後の小節に `fill`（3〜4 拍目をタムが高い方から下る）を付け、旋律はその 2 拍を休符にするか短く切る。区間の頭に `crash`
+- `beat` はキック 1・3 拍（2 小節に 1 回 3 拍裏が増える）、ゲートリバーブのスネア 2・4 拍、16 分のハット。`bass` は根音と 1 オクターブ上を 16 分で交互に弾き、キックで沈む。パッドは毎小節鳴る
+- 和音は 7th を足して 4〜5 音、根音を先頭に A3〜G4（m → m7、長三和音 → maj7、属和音 → 7・7(♭9)）。B のペダルの上で和音が変わる原曲は、根音の代わりに B を先頭に置く
+- リードは太いノコギリ波（ポルタメントと付点 8 分のディレイ）。`sax` を付けた小節は FM のサックスになる。崩し方はサビ 1 の後半を `arpeggio`、サビ 2 を 3＋3＋2 と 1 オクターブ上にする
+- 音量は 5b 節と同じく `Tone.Offline` で声部ごとに測る。サビでリードの RMS 0.06、ベース 0.055、ドラム 0.07、パッド 0.035、`arp` 0.025 前後、全体のピークが 0.75 前後なら割れず、旋律が埋もれない
+
 ## 6. 確かめる
 
 - `npx -p typescript tsc --noEmit -p .` と `npm run build` を `> log 2>&1; echo EXIT:$?` で受ける
-- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`swing`・`citypop` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
+- worktree の中で `npx tsx .claude/skills/touhou-arrange/scripts/check.mts <slug>` を実行し（`chip`・`future`・`lofi`・`dnb`・`dubstep`・`bossa`・`swing`・`citypop`・`synthwave` に対応）、`badBars` が空（意図した休みの小節は除く）・`monoCollisions` が 0 であること、最後の小節から最初の小節への和音とメロディのつながりを見る
 - メロディを採点する（手順は `lab/scoring/README.md`）。`npx tsx lab/scoring/export.mts > lab/scoring/out/pieces.json` のあと `lab/scoring` で `uv run python score_piece.py <slug>` を実行し、事故が 0 であることと、4 小節ごとの音高の意外さを見る。0.3 ビット未満の区間は同じ旋律の繰り返しなので、答えの句を足すなどして崩す
 - 変奏の区間（ループ A'、ドロップ 2・3 など）は、崩し方の違う案を 5〜8 個書いて JSON にし、`uv run python variations.py <slug> <最初の小節> <候補.json>` で採点する（書き方は `variations.py` の先頭）。モデルは採点だけに使い、候補は自分で書く。事故が 0 で、音高の意外さが 0.6〜2.0 ビットに入る案のうち、まとまりの高いものを採る
 - `playwright-cli` でページを開いて PLAY を押し、イントロ・ドロップ 2・つなぎ目の後でスクリーンショットを撮る。コンソールのエラーが favicon の 404 だけであること
