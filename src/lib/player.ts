@@ -71,18 +71,9 @@ export function mount(
   const label = els.status.textContent;
   let playing = false;
 
-  els.button.addEventListener("click", async () => {
-    if (playing) {
-      transport.stop();
-      transport.cancel();
-      kit.releaseAll();
-      playing = false;
-      els.button.textContent = "PLAY";
-      return;
-    }
+  const play = async () => {
     els.button.disabled = true;
     els.status.textContent = "音源を読み込み中…";
-    await Tone.start();
     await Tone.loaded();
     els.status.textContent = label;
     els.button.disabled = false;
@@ -125,6 +116,31 @@ export function mount(
     transport.loop = true;
     transport.start("+0.1");
     playing = true;
+    // ブラウザに自動再生を止められたときは、ページを最初にクリックしたときに鳴り始める
+    await Tone.start();
     els.button.textContent = "STOP";
+  };
+
+  els.button.addEventListener("click", () => {
+    if (!playing) return void play();
+    if (Tone.getContext().state !== "running") return;
+    transport.stop();
+    transport.cancel();
+    kit.releaseAll();
+    playing = false;
+    els.button.textContent = "PLAY";
   });
+  for (const type of ["click", "keydown"]) document.addEventListener(type, () => Tone.start());
+  document.addEventListener("keydown", (e) => {
+    if (e.code !== "Space") return;
+    e.preventDefault();
+    if (e.repeat) return;
+    if (!playing) return void play();
+    if (Tone.getContext().state !== "running") return;
+    if (transport.state === "started") {
+      transport.pause();
+      kit.releaseAll();
+    } else transport.start();
+  });
+  void play();
 }
