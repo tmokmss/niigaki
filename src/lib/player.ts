@@ -131,5 +131,16 @@ export function mount(
     els.button.textContent = "PLAY";
   });
   for (const type of ["click", "keydown"]) document.addEventListener(type, () => Tone.start());
+  document.addEventListener("keydown", (e) => {
+    if (e.code !== "Space") return;
+    e.preventDefault();
+    if (e.repeat) return;
+    if (!playing) return void play();
+    if (Tone.getContext().state !== "running") return;
+    if (transport.state === "started") {
+      transport.pause();
+      kit.releaseAll();
+    } else transport.start();
+  });
   void play();
 }
